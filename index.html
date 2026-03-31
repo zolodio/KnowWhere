@@ -414,7 +414,16 @@ const BIBLE_DATABASE = [
   { verse_text: "He was with God in the beginning.", testament: "New", book: "John", chapter: 1, verse: 2, adjacent_prev: "In the beginning was the Word, and the Word was with God, and the Word was God.", adjacent_next: "Through him all things were made; without him nothing has been made that has been made.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [40, 41, 3, 4] },
   { verse_text: "Through him all things were made; without him nothing has been made that has been made.", testament: "New", book: "John", chapter: 1, verse: 3, adjacent_prev: "He was with God in the beginning.", adjacent_next: "In him was life, and that life was the light of all mankind.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5] }
 ];
+const verseMap = {};
 
+BIBLE_DATABASE.forEach(v => {
+  const key = `${v.book}|${v.chapter}|${v.verse}`;
+  verseMap[key] = v;
+});
+function getVerseText(book, chapter, verse) {
+  const key = `${book}|${chapter}|${verse}`;
+  return verseMap[key]?.verse_text || null;
+}
 // ===================== STATE =====================
 const state = {
   screen: 'home',
@@ -458,7 +467,98 @@ const LEVELS = [
   { name: 'Scholar', icon: '📜', xp: 500 },
   { name: 'Sage', icon: '🕊️', xp: 800 },
   { name: 'Prophet', icon: '⚡', xp: 1200 },
-  { name: 'Apostle', icon: '👑', xp: 1800 }
+  { name: 'Apostle', icon: '🤲', xp: 1800 },
+  { name: 'Believer', icon: '🪦', xp: 2200 },
+  { name: 'Disciple', icon: '👣', xp: 2650 },
+  { name: 'Servant', icon: '🤝', xp: 3150 },
+  { name: 'Friend', icon: '❤️', xp: 3700 },
+  { name: 'Child of God', icon: '👼', xp: 4300 },
+  { name: 'Young Warrior', icon: '⚔️', xp: 4950 },
+  { name: 'Overcomer', icon: '🛡️', xp: 5650 },
+  { name: 'Rooted One', icon: '🌱', xp: 6400 },
+  { name: 'Fruitbearer', icon: '🍇', xp: 7200 },
+  { name: 'Steadfast', icon: '🪨', xp: 8050 },
+  { name: 'Prayer Warrior', icon: '🕯️', xp: 8950 },
+  { name: 'Peacemaker', icon: '🕊️', xp: 9900 },
+  { name: 'Lightbearer', icon: '💡', xp: 10900 },
+  { name: 'Salt of the Earth', icon: '🧂', xp: 11950 },
+  { name: 'Watchman', icon: '🔭', xp: 13050 },
+  { name: 'Shepherd', icon: '🐑', xp: 14200 },
+  { name: 'Steward', icon: '💼', xp: 15400 },
+  { name: 'Builder', icon: '🔨', xp: 16650 },
+  { name: 'Teacher', icon: '🏫', xp: 17950 },
+  { name: 'Mentor', icon: '🕯️', xp: 19300 },
+  { name: 'Restorer', icon: '🩹', xp: 20700 },
+  { name: 'Consoler', icon: '🫂', xp: 22150 },
+  { name: 'Confessor', icon: '🗣️', xp: 23650 },
+  { name: 'Witness', icon: '📢', xp: 25200 },
+  { name: 'Evangelist', icon: '🌍', xp: 26800 },
+  { name: 'Missionary', icon: '✈️', xp: 28450 },
+  { name: 'Pilgrim', icon: '🥾', xp: 30150 },
+  { name: 'Follower of the Way', icon: '🛤️', xp: 31900 },
+  { name: 'Doer of the Word', icon: '✅', xp: 33700 },
+  { name: 'Guardian of Truth', icon: '🔐', xp: 35550 },
+  { name: 'Spirit-Filled', icon: '🌀', xp: 37450 },
+  { name: 'Led by the Spirit', icon: '🧭', xp: 39400 },
+  { name: 'Abiding One', icon: '🌳', xp: 41400 },
+  { name: 'Intercessor', icon: '🤲', xp: 43450 },
+  { name: 'Sacrificial', icon: '🫱', xp: 45550 },
+  { name: 'Crucified to the World', icon: '✝️', xp: 47700 },
+  { name: 'Dead to Self', icon: '⚰️', xp: 50000 },
+  { name: 'Resurrected in Christ', icon: '🌅', xp: 52350 },
+  { name: 'Seated in Heaven', icon: '🪑', xp: 54750 },
+  { name: 'Ambassador', icon: '🌍', xp: 57200 },
+  { name: 'Fellow Worker', icon: '🛠️', xp: 59700 },
+  { name: 'Fellowship Keeper', icon: '🤝', xp: 62250 },
+  { name: 'Unity Builder', icon: '🧩', xp: 64850 },
+  { name: 'Householder', icon: '🏠', xp: 67500 },
+  { name: 'Father in Faith', icon: '🧔', xp: 70200 },
+  { name: 'Mother in Zion', icon: '👩', xp: 72950 },
+  { name: 'Patriarch', icon: '🏛️', xp: 75750 },
+  { name: 'Matriarch', icon: '🪞', xp: 78600 },
+  { name: 'Elder', icon: '👴', xp: 81500 },
+  { name: 'Overcomer of Babylon', icon: '🏙️', xp: 84450 },
+  { name: 'Conqueror', icon: '🏆', xp: 87450 },
+  { name: 'More Than Conqueror', icon: '💪', xp: 90500 },
+  { name: 'Living Stone', icon: '🪨', xp: 93600 },
+  { name: 'Temple of God', icon: '🕌', xp: 96750 },
+  { name: 'City on a Hill', icon: '🏙️', xp: 100000 },
+  { name: 'Star of the Morning', icon: '⭐', xp: 103300 },
+  { name: 'Bride of Christ', icon: '👰', xp: 106650 },
+  { name: 'Fellow Heir', icon: '👑', xp: 110050 },
+  { name: 'Co-Regent', icon: '🪑', xp: 113500 },
+  { name: 'Son of God', icon: '✨', xp: 117000 },
+  { name: 'Image of Christ', icon: '🫱🫰', xp: 120550 },
+  { name: 'Perfect in Love', icon: '💖', xp: 124150 },
+  { name: 'Fullness of Christ', icon: '🌌', xp: 127800 },
+  { name: 'One with the Father', icon: '🤲', xp: 131500 },
+  { name: 'Glorified', icon: '✨', xp: 135250 },
+  { name: 'Eternal Witness', icon: '📜', xp: 139050 },
+  { name: 'Throne-Sharer', icon: '🪑', xp: 142900 },
+  { name: 'New Creation', icon: '🦋', xp: 146800 },
+  { name: 'Firstfruits', icon: '🌾', xp: 150750 },
+  { name: 'Lampstand', icon: '🕯️', xp: 154750 },
+  { name: 'Tree of Life', icon: '🌳', xp: 158800 },
+  { name: 'Living Water', icon: '💧', xp: 162900 },
+  { name: 'Light of the World', icon: '🔆', xp: 167050 },
+  { name: 'Harvester', icon: '🪓', xp: 171250 },
+  { name: 'Reaper of Souls', icon: '🪝', xp: 175500 },
+  { name: 'Kingdom Builder', icon: '🏰', xp: 179800 },
+  { name: 'Gatekeeper of Zion', icon: '🚪', xp: 184150 },
+  { name: 'Sealed by the Spirit', icon: '🔒', xp: 188550 },
+  { name: 'Crown-Bearer', icon: '👑', xp: 193000 },
+  { name: 'Victor in Tribulation', icon: '🔥', xp: 197500 },
+  { name: 'Faithful unto Death', icon: '✝️', xp: 202050 },
+  { name: 'Resurrection Heir', icon: '🌅', xp: 206650 },
+  { name: 'Citizen of Heaven', icon: '🪐', xp: 211300 },
+  { name: 'Saint Eternal', icon: '🕯️', xp: 216000 },
+  { name: 'Chosen Vessel', icon: '🏺', xp: 220750 },
+  { name: 'Voice of the Cloud of Witnesses', icon: '☁️', xp: 225550 },
+  { name: 'Eternal Worshipper', icon: '🎵', xp: 230400 },
+  { name: 'Throne-Attendant', icon: '🪑', xp: 235300 },
+  { name: 'Lamb-Follower', icon: '🐑', xp: 240250 },
+  { name: 'New Jerusalem Dweller', icon: '🏙️', xp: 245250 },
+  { name: 'Face-to-Face', icon: '👁️', xp: 250300 }
 ];
 
 const LOADING_MSGS = [
@@ -613,20 +713,28 @@ function generateNeighborData(verse, difficulty) {
   };
 
   if (difficulty === 'veryhard') {
-    data.adjacent_text = verse.adjacent_next || "Look to the next verse in your Bible.";
+    data.adjacent_text = verse.adjacent_next;
     data.adjacent_verse = verse.verse + 1;
+
   } else if (difficulty === 'medium') {
-    data.correct_answer = verse.adjacent_next || "The next verse continues the thought.";
-    data.wrong_options = [
-      "This is a plausible continuation of the passage.",
-      "Another verse that fits thematically but is wrong.",
-      "A verse that sounds like it could follow here."
-    ];
+    data.correct_answer = verse.adjacent_next;
+
+    // ✅ REAL verses now
+    data.wrong_options = getWrongVerseTexts(verse, 3);
+
   } else {
     // Easy
-    data.real_before = "The verse before it sets up the context.";
-    data.real_after = verse.adjacent_next || "The next verse continues naturally.";
-    data.fake_verse = "A convincing verse that sounds like it belongs.";
+    data.real_after = verse.adjacent_next;
+
+    // ✅ Real fake verse
+    data.fake_verse = getWrongVerseTexts(verse, 1)[0];
+    
+    // Try to get previous verse from the database; fallback to adjacent_next if missing
+const prevVerse = getVerseText(verse.book, verse.chapter, verse.verse - 1);
+data.real_before = prevVerse || verse.adjacent_prev || verse.adjacent_next;
+
+data.real_after = verse.adjacent_next;
+
     data.fake_position = Math.random() > 0.5 ? 'before' : 'after';
   }
 
@@ -1380,6 +1488,40 @@ function shuffleArray(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+function getWrongVerseTexts(verse, count) {
+  const candidates = [];
+
+  // Use the “wrong_*” lists from the verse object if available
+  const wrongBooks = verse.wrong_books || [];
+  const wrongChapters = (verse.wrong_chapters || []).map(String);
+  const wrongVerses = (verse.wrong_verses || []).map(String);
+
+  // Generate candidate keys by mixing wrong book/chapter/verse
+  // (This is approximate; your dataset is handcrafted so this usually works.)
+  for (const b of (wrongBooks.length ? wrongBooks : [verse.book])) {
+    const chaptersToTry = wrongChapters.length ? wrongChapters : [String(verse.chapter)];
+    const versesToTry = wrongVerses.length ? wrongVerses : [String(verse.verse)];
+
+    for (const c of chaptersToTry) {
+      for (const v of versesToTry) {
+        const text = getVerseText(b, parseInt(c, 10), parseInt(v, 10));
+        if (text && text !== verse.verse_text) {
+          candidates.push(text);
+        }
+      }
+    }
+  }
+
+  // Fallback: scan random verses if we still have too few
+  if (candidates.length < count) {
+    const pool = BIBLE_DATABASE.map(x => x.verse_text).filter(t => t !== verse.verse_text);
+    while (candidates.length < count && pool.length) {
+      candidates.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+  }
+
+  return shuffleArray([...new Set(candidates)]).slice(0, count);
 }
 
 function escHtml(text) {
