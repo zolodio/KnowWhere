@@ -445,6 +445,7 @@ const state = {
   g1Options: [],
   g2HintsUsed: 0,
   g2Answered: false,
+  g2MediumOptions: [],
 };
 
 // ===================== BIBLE DATA =====================
@@ -582,6 +583,7 @@ function addXP(amount) {
   state.xp += amount;
   const newLevel = getLevel(state.xp);
   updateStats();
+  saveToStorage();
   if (newLevel.index > oldLevel.index) {
     setTimeout(() => showLevelUp(newLevel), 600);
   }
@@ -932,7 +934,7 @@ function submitBook() {
 function renderBookChoices() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
-  const opts = state.g1Options;
+  const opts = state.g2MediumOptions;
   gc.innerHTML = `
     <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
       <div class="verse-ref">${data.testament} Testament</div></div>
@@ -947,7 +949,7 @@ function renderBookChoices() {
 
 function guessBookOption(idx) {
   const correct = state.currentData.book;
-  const opt = state.g1Options[idx];
+  const opt = state.g2MediumOptions[idx];
   const isCorrect = opt.value.toLowerCase() === correct.toLowerCase();
   document.querySelectorAll('#book-options .option-btn').forEach(b => { b.disabled = true; });
 
@@ -966,7 +968,7 @@ function guessBookOption(idx) {
     state.totalAnswers++;
     showFeedback(false);
     opt.eliminated = true;
-    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
     if (wrongOpts.length > 0) {
       wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     }
@@ -1029,7 +1031,7 @@ function renderNumberChoices(type) {
   const correct = type === 'chapter' ? data.chapter : data.verse;
   const refParts = [data.testament + ' Testament', data.book];
   if (type === 'verse') refParts.push('Chapter ' + data.chapter);
-  const opts = state.g1Options;
+  const opts = state.g2MediumOptions;
 
   gc.innerHTML = `
     <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
@@ -1045,7 +1047,7 @@ function renderNumberChoices(type) {
 
 function guessNumOption(idx, type) {
   const correct = type === 'chapter' ? state.currentData.chapter : state.currentData.verse;
-  const opt = state.g1Options[idx];
+  const opt = state.g2MediumOptions[idx];
   const isCorrect = String(opt.value) === String(correct);
   const stepIdx = type === 'chapter' ? 2 : 3;
   document.querySelectorAll('#num-options .option-btn').forEach(b => { b.disabled = true; });
@@ -1065,7 +1067,7 @@ function guessNumOption(idx, type) {
     state.totalAnswers++;
     showFeedback(false);
     opt.eliminated = true;
-    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
     if (wrongOpts.length > 0) {
       wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     }
@@ -1227,14 +1229,19 @@ function initNeighborMedium(data) {
   state.g2HintsUsed = 0;
   state.g2Answered = false;
   const options = shuffleArray([data.correct_answer, ...data.wrong_options]);
-  state.g1Options = options.map(o => ({ value: o, eliminated: false, isCorrect: o === data.correct_answer }));
+   state.g2MediumOptions = options.map(o => ({
+    value: o,
+    eliminated: false,
+    isCorrect: o === data.correct_answer
+  }));
+
   renderMediumQuestion();
 }
 
 function renderMediumQuestion() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
-  const opts = state.g1Options;
+  const opts = state.g2MediumOptions;
   gc.innerHTML = `
     <div class="verse-card">
       <div class="verse-text">${escHtml(data.verse_text)}</div>
@@ -1266,7 +1273,7 @@ function useMedHint() {
 }
 
 function guessMedOption(idx) {
-  const opt = state.g1Options[idx];
+  const opt = state.g2MediumOptions[idx];
   const isCorrect = opt.isCorrect;
   document.querySelectorAll('#med-options .option-btn').forEach(b => { b.disabled = true; });
 
@@ -1289,7 +1296,7 @@ function guessMedOption(idx) {
     state.totalAnswers++;
     showFeedback(false);
     opt.eliminated = true;
-    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
     if (wrongOpts.length > 0) {
       wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     }
@@ -1553,10 +1560,106 @@ document.addEventListener('click', function(e) {
 });
 
 function init() {
+  loadFromStorage(); // ✅ restore stats immediately
   updateStats();
 }
 
 init();
+// Save before the page is destroyed / closed / refreshed
+window.addEventListener('beforeunload', () => {
+  saveToStorage();
+});
+
+// Better coverage for mobile browsers
+window.addEventListener('pagehide', () => {
+  saveToStorage();
+});
+
+// Also save when the tab becomes hidden
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveToStorage();
+});
+const SAVE_KEY = 'sq_save_v1';
+
+function serializeSave() {
+  return {
+    version: 1,
+    stats: {
+      xp: state.xp,
+      gamesPlayed: state.gamesPlayed,
+      correctAnswers: state.correctAnswers,
+      totalAnswers: state.totalAnswers,
+      streak: state.streak,
+      bestStreak: state.bestStreak,
+    },
+    // Optional: keep some round progress too
+    inProgress: state.screen === 'game' ? {
+      selectedGame: state.selectedGame,
+      selectedDiff: state.selectedDiff,
+      currentData: state.currentData,
+      roundXP: state.roundXP,
+      roundBreakdown: state.roundBreakdown,
+      roundResults: state.roundResults,
+      g1Step: state.g1Step,
+      g1Attempt: state.g1Attempt,
+      g1Options: state.g1Options,
+      g2HintsUsed: state.g2HintsUsed,
+      g2Answered: state.g2Answered,
+      // include medium options if mid-question
+      g2MediumOptions: state.g2MediumOptions,
+      // easy setup
+      _easySetup: state._easySetup || null
+    } : null
+  };
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(serializeSave()));
+  } catch (e) {
+    // ignore quota/permission errors
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+
+    const saved = JSON.parse(raw);
+    if (!saved || saved.version !== 1) return;
+
+    state.xp = saved.stats.xp ?? state.xp;
+    state.gamesPlayed = saved.stats.gamesPlayed ?? state.gamesPlayed;
+    state.correctAnswers = saved.stats.correctAnswers ?? state.correctAnswers;
+    state.totalAnswers = saved.stats.totalAnswers ?? state.totalAnswers;
+    state.streak = saved.stats.streak ?? state.streak;
+    state.bestStreak = saved.stats.bestStreak ?? state.bestStreak;
+
+    // Update UI after load
+    updateStats();
+
+    // Optional: restore in-progress game state if you want
+    // (You can skip restoring gameplay if you only care about stats.)
+    if (saved.inProgress) {
+      state.selectedGame = saved.inProgress.selectedGame ?? null;
+      state.selectedDiff = saved.inProgress.selectedDiff ?? null;
+      state.currentData = saved.inProgress.currentData ?? null;
+      state.roundXP = saved.inProgress.roundXP ?? 0;
+      state.roundBreakdown = saved.inProgress.roundBreakdown ?? [];
+      state.roundResults = saved.inProgress.roundResults ?? [];
+      state.g1Step = saved.inProgress.g1Step ?? 0;
+      state.g1Attempt = saved.inProgress.g1Attempt ?? 0;
+      state.g1Options = saved.inProgress.g1Options ?? [];
+      state.g2HintsUsed = saved.inProgress.g2HintsUsed ?? 0;
+      state.g2Answered = saved.inProgress.g2Answered ?? false;
+      state.g2MediumOptions = saved.inProgress.g2MediumOptions ?? [];
+      state._easySetup = saved.inProgress._easySetup ?? null;
+    }
+  } catch (e) {
+    // ignore parse errors
+  }
+}
 </script>
 </body>
 </html>
