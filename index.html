@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scripture Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-deep:#060a14;--bg-primary:#0a0f1e;--bg-secondary:#111832;--bg-card:#161e3a;--bg-card-hover:#1c2648;
+  --gold:#caa328;--gold-light:#e8d15a;--gold-dim:#7a6518;--gold-glow:rgba(202,163,40,.25);
+  --text-primary:#e8e0d0;--text-secondary:#a09880;--text-muted:#605848;
+  --success:#2dd47a;--success-bg:rgba(45,212,122,.12);--success-border:rgba(45,212,122,.35);
+  --error:#f04848;--error-bg:rgba(240,72,72,.12);--error-border:rgba(240,72,72,.35);
+  --border:rgba(202,163,40,.1);--border-active:rgba(202,163,40,.35);
+  --font-display:'Cinzel',serif;--font-verse:'Spectral',serif;--font-ui:'Manrope',sans-serif;
+  --radius:12px;--radius-sm:8px;--radius-pill:50px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-primary);-webkit-tap-highlight-color:transparent}
+#app{height:100%;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;
+  background:linear-gradient(170deg,var(--bg-deep) 0%,#0c1228 40%,#0e1430 70%,var(--bg-deep) 100%)}
+.bg-pattern{position:fixed;inset:0;pointer-events:none;opacity:.03;
+  background-image:radial-gradient(circle at 20% 30%,var(--gold) 1px,transparent 1px),
+  radial-gradient(circle at 80% 70%,var(--gold) 1px,transparent 1px);
+  background-size:60px 60px,80px 80px}
+
+#app::-webkit-scrollbar{width:4px}
+#app::-webkit-scrollbar-track{background:transparent}
+#app::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:4px}
+
+.screen{display:none;padding:20px 16px 40px;max-width:480px;margin:0 auto;min-height:100%;position:relative}
+.screen.active{display:flex;flex-direction:column;animation:fadeIn .4s ease}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes shake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-6px)}30%,60%,90%{transform:translateX(6px)}}
+@keyframes glow{0%{box-shadow:0 0 5px var(--gold-glow)}50%{box-shadow:0 0 20px var(--gold-glow),0 0 40px rgba(202,163,40,.1)}100%{box-shadow:0 0 5px var(--gold-glow)}}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)}}
+@keyframes confettiDrop{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(calc(100vh)) rotate(720deg);opacity:0}}
+@keyframes scaleIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+.app-icon{font-size:28px;color:var(--gold);margin-bottom:4px;filter:drop-shadow(0 0 8px var(--gold-glow))}
+.app-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--gold-light);
+  letter-spacing:3px;text-transform:uppercase;line-height:1.2;text-shadow:0 0 30px var(--gold-glow)}
+.app-subtitle{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);font-size:14px;margin-top:4px}
+
+.stats-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:20px 0}
+.level-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.level-badge{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--gold-light)}
+.level-badge .icon{font-size:22px}
+.xp-text{font-size:12px;color:var(--text-secondary);font-weight:500}
+.xp-bar-bg{height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-light));
+  border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.stats-row{display:flex;gap:12px;margin-top:12px}
+.stat-item{flex:1;text-align:center;padding:8px 4px;background:var(--bg-secondary);border-radius:var(--radius-sm)}
+.stat-value{font-size:18px;font-weight:700;color:var(--text-primary)}
+.stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+.pill-group{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+.pill{font-family:var(--font-ui);font-size:14px;font-weight:600;padding:10px 20px;border-radius:var(--radius-pill);
+  border:1.5px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;
+  transition:all .25s ease;white-space:nowrap;user-select:none;-webkit-user-select:none}
+.pill:hover{border-color:var(--border-active);color:var(--text-primary);background:var(--bg-card-hover)}
+.pill.active{background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#0a0f1e;
+  border-color:var(--gold);box-shadow:0 0 16px var(--gold-glow);font-weight:700}
+.pill.small{font-size:12px;padding:7px 14px}
+
+.btn{font-family:var(--font-ui);font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;
+  padding:14px 28px;font-size:16px;transition:all .25s ease;text-transform:uppercase;letter-spacing:1px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;user-select:none;-webkit-user-select:none}
+.btn-primary{background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#0a0f1e;
+  box-shadow:0 4px 20px var(--gold-glow)}
+.btn-primary:hover{box-shadow:0 4px 30px rgba(202,163,40,.4);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border-active);background:var(--bg-card-hover)}
+.btn-success{background:var(--success);color:#0a0f1e}
+.btn-error{background:var(--error);color:#fff}
+.btn-sm{padding:10px 18px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-full{width:100%}
+
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-glow{animation:glow 3s ease-in-out infinite}
+
+.verse-card{position:relative;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));
+  border:1px solid var(--border-active);border-radius:var(--radius);padding:28px 24px 24px;margin:16px 0}
+.verse-card::before{content:'\201C';position:absolute;top:-8px;left:16px;font-family:var(--font-verse);
+  font-size:64px;color:var(--gold-dim);line-height:1;opacity:.6}
+.verse-text{font-family:var(--font-verse);font-size:18px;line-height:1.7;color:var(--text-primary);
+  position:relative;z-index:1}
+.verse-ref{font-family:var(--font-ui);font-size:12px;color:var(--gold);font-weight:600;
+  margin-top:12px;letter-spacing:1px;text-transform:uppercase}
+
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.back-btn{background:none;border:none;color:var(--text-secondary);font-size:20px;cursor:pointer;
+  padding:8px;border-radius:50%;transition:all .2s}
+.back-btn:hover{color:var(--gold);background:var(--bg-card)}
+.game-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--gold-light)}
+.step-indicator{display:flex;gap:6px;margin:12px 0 20px;justify-content:center}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border);transition:all .3s}
+.step-dot.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
+.step-dot.done{background:var(--success);border-color:var(--success)}
+.step-dot.wrong{background:var(--error);border-color:var(--error)}
+
+.question-label{font-family:var(--font-display);font-size:15px;color:var(--gold);margin-bottom:12px;
+  text-align:center;letter-spacing:1px}
+.question-sub{font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:16px}
+
+.options-grid{display:flex;flex-direction:column;gap:10px}
+.option-btn{font-family:var(--font-ui);font-size:15px;padding:14px 18px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--bg-card);color:var(--text-primary);cursor:pointer;
+  transition:all .2s ease;text-align:left;line-height:1.5;display:flex;align-items:flex-start;gap:10px;
+  word-break:break-word}
+.option-btn:hover{border-color:var(--border-active);background:var(--bg-card-hover)}
+.option-btn .opt-letter{min-width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--bg-secondary);font-size:12px;font-weight:700;color:var(--text-muted);flex-shrink:0}
+.option-btn.correct{border-color:var(--success-border);background:var(--success-bg);color:var(--success)}
+.option-btn.correct .opt-letter{background:var(--success);color:#0a0f1e}
+.option-btn.wrong{border-color:var(--error-border);background:var(--error-bg);color:var(--error);animation:shake .4s ease}
+.option-btn.wrong .opt-letter{background:var(--error);color:#fff}
+.option-btn.eliminated{opacity:.25;pointer-events:none;transform:scale(.97)}
+.option-btn:disabled{cursor:not-allowed}
+
+.options-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.input-wrap{position:relative;margin-bottom:12px}
+.input-field{width:100%;font-family:var(--font-ui);font-size:16px;padding:14px 16px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);outline:none;
+  transition:border-color .2s}
+.input-field:focus{border-color:var(--gold)}
+.input-field::placeholder{color:var(--text-muted)}
+textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-family:var(--font-verse)}
+
+.search-dropdown{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;
+  background:var(--bg-card);border:1px solid var(--border-active);border-radius:var(--radius-sm);
+  margin-top:4px;z-index:10;display:none}
+.search-dropdown.open{display:block}
+.search-item{padding:10px 16px;cursor:pointer;font-size:14px;color:var(--text-primary);
+  transition:background .15s;border-bottom:1px solid var(--border)}
+.search-item:hover,.search-item.highlighted{background:var(--bg-card-hover);color:var(--gold-light)}
+.search-item:last-child{border-bottom:none}
+
+.hints-row{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.hint-btn{font-size:12px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid var(--border);
+  background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:all .2s;
+  font-family:var(--font-ui);font-weight:600}
+.hint-btn:hover{border-color:var(--gold-dim);color:var(--gold)}
+.hint-btn.used{border-color:var(--gold-dim);color:var(--gold);background:rgba(202,163,40,.08)}
+.hint-btn:disabled{opacity:.3;cursor:not-allowed}
+.hint-reveal{font-size:13px;color:var(--gold);text-align:center;margin:8px 0;animation:slideUp .3s ease;
+  font-family:var(--font-verse);font-style:italic}
+
+.compare-block{padding:16px;background:var(--bg-secondary);border-radius:var(--radius-sm);margin:12px 0;line-height:1.8}
+.compare-block .word-correct{color:var(--success);font-weight:500}
+.compare-block .word-wrong{color:var(--error);text-decoration:line-through;opacity:.7}
+.compare-block .word-missing{color:var(--error);opacity:.5;font-style:italic}
+.accuracy-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-pill);
+  font-weight:700;font-size:14px;margin:12px auto;text-align:center}
+.accuracy-badge.high{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.accuracy-badge.med{background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.35)}
+.accuracy-badge.low{background:var(--error-bg);color:var(--error);border:1px solid var(--error-border)}
+
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px}
+.loading-dots{display:flex;gap:8px}
+.loading-dots span{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulse 1.2s ease-in-out infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+.loading-text{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);font-size:14px}
+
+.feedback{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:var(--radius-pill);
+  font-weight:700;font-size:14px;z-index:100;animation:slideUp .3s ease;pointer-events:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.feedback.correct{background:var(--success);color:#0a0f1e}
+.feedback.wrong{background:var(--error);color:#fff}
+
+.xp-float{position:fixed;font-family:var(--font-display);font-weight:700;color:var(--gold-light);font-size:18px;
+  z-index:100;pointer-events:none;animation:floatUp 1.2s ease forwards;
+  text-shadow:0 0 10px var(--gold-glow)}
+
+.level-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:rgba(6,10,20,.9);animation:fadeIn .4s ease}
+.level-card{text-align:center;animation:scaleIn .5s cubic-bezier(.175,.885,.32,1.275);padding:40px 30px}
+.level-card .new-level-icon{font-size:60px;margin-bottom:16px;filter:drop-shadow(0 0 20px var(--gold-glow))}
+.level-card h2{font-family:var(--font-display);font-size:24px;color:var(--gold-light);margin-bottom:8px}
+.level-card p{color:var(--text-secondary);font-size:14px;margin-bottom:24px}
+
+.confetti-piece{position:fixed;top:-10px;width:8px;height:8px;z-index:201;pointer-events:none;
+  animation:confettiDrop 2.5s ease-in forwards}
+
+.result-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;
+  border-bottom:1px solid var(--border)}
+.result-row:last-child{border-bottom:none}
+.result-label{font-size:14px;color:var(--text-secondary)}
+.result-value{font-weight:700;font-size:14px}
+.result-value.correct{color:var(--success)}
+.result-value.wrong{color:var(--error)}
+.xp-breakdown{margin-top:12px}
+.xp-line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--text-secondary)}
+.xp-line .amount{color:var(--gold-light);font-weight:700}
+.xp-total{display:flex;justify-content:space-between;padding:8px 0;font-size:16px;font-weight:700;
+  color:var(--gold-light);border-top:1px solid var(--border-active);margin-top:4px}
+
+.modal-overlay{position:fixed;inset:0;z-index:150;background:rgba(6,10,20,.85);
+  display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.modal-box{background:var(--bg-card);border:1px solid var(--border-active);border-radius:var(--radius);
+  padding:24px;max-width:360px;width:100%;animation:scaleIn .3s ease}
+.modal-box h3{font-family:var(--font-display);font-size:16px;color:var(--gold-light);margin-bottom:12px}
+.modal-box p{font-size:14px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5}
+.modal-actions{display:flex;gap:10px}
+
+.diff-label{font-size:11px;padding:3px 8px;border-radius:var(--radius-pill);font-weight:700;letter-spacing:.5px}
+.diff-easy{background:rgba(45,212,122,.15);color:var(--success)}
+.diff-med{background:rgba(234,179,8,.15);color:#eab308}
+.diff-hard{background:rgba(240,72,72,.15);color:var(--error)}
+
+.section-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;
+  font-weight:700;margin-bottom:8px;text-align:center}
+
+.verse-option{padding:16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);
+  background:var(--bg-card);cursor:pointer;transition:all .2s;margin-bottom:10px}
+.verse-option:hover{border-color:var(--border-active);background:var(--bg-card-hover)}
+.verse-option .vo-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:6px}
+.verse-option .vo-text{font-family:var(--font-verse);font-size:15px;line-height:1.6;color:var(--text-primary)}
+.verse-option.correct{border-color:var(--success-border);background:var(--success-bg)}
+.verse-option.correct .vo-label{color:var(--success)}
+.verse-option.wrong{border-color:var(--error-border);background:var(--error-bg);animation:shake .4s}
+.verse-option.wrong .vo-label{color:var(--error)}
+
+@media(max-width:380px){
+  .app-title{font-size:22px;letter-spacing:2px}
+  .pill{padding:8px 14px;font-size:13px}
+  .verse-text{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div id="app">
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen active">
+  <div style="text-align:center;padding-top:24px">
+    <div class="app-icon"><i class="fa-solid fa-book-bible"></i></div>
+    <h1 class="app-title">Scripture Quest</h1>
+    <p class="app-subtitle">"Thy word is a lamp unto my feet"</p>
+  </div>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="level-row">
+      <div class="level-badge"><span class="icon" id="level-icon"></span><span id="level-name"></span></div>
+      <div class="xp-text"><span id="xp-current"></span> / <span id="xp-next"></span> XP</div>
+    </div>
+    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar"></div></div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-value" id="stat-played">0</div><div class="stat-label">Played</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-accuracy">0%</div><div class="stat-label">Accuracy</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-streak">0 <span style="font-size:14px">🔥</span></div><div class="stat-label">Streak</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Choose Your Challenge</div>
+  <div class="pill-group" id="game-pills">
+    <button class="pill" data-game="detective" onclick="selectGame('detective')">
+      <i class="fa-solid fa-magnifying-glass" style="margin-right:4px"></i> Verse Detective
+    </button>
+    <button class="pill" data-game="neighbor" onclick="selectGame('neighbor')">
+      <i class="fa-solid fa-arrows-left-right" style="margin-right:4px"></i> Verse Neighbor
+    </button>
+  </div>
+
+  <div id="difficulty-section" style="display:none">
+    <div class="section-label" style="margin-top:4px">Difficulty</div>
+    <div class="pill-group" id="diff-pills">
+      <button class="pill small" data-diff="easy" onclick="selectDiff('easy')">
+        <span class="diff-label diff-easy">Easy</span>
+      </button>
+      <button class="pill small" data-diff="medium" onclick="selectDiff('medium')">
+        <span class="diff-label diff-med">Medium</span>
+      </button>
+      <button class="pill small" data-diff="veryhard" onclick="selectDiff('veryhard')">
+        <span class="diff-label diff-hard">Very Hard</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="flex:1"></div>
+  <button class="btn btn-primary btn-full" id="start-btn" onclick="startGame()" disabled>
+    <i class="fa-solid fa-play"></i> Begin
+  </button>
+  <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px">
+    Verses from Bible Database &middot; Scores saved this session
+  </p>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="game-title" id="game-title"></div>
+    <div style="flex:1"></div>
+    <div id="game-score-mini" style="font-size:13px;color:var(--gold);font-weight:700"></div>
+  </div>
+  <div id="step-indicator" class="step-indicator"></div>
+  <div id="game-content"></div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="screen-results" class="screen">
+  <div style="text-align:center;padding-top:20px">
+    <div id="results-icon" style="font-size:48px;margin-bottom:12px"></div>
+    <h2 style="font-family:var(--font-display);font-size:20px;color:var(--gold-light)" id="results-title"></h2>
+    <p style="font-size:14px;color:var(--text-secondary);margin-top:4px" id="results-sub"></p>
+  </div>
+  <div class="card" style="margin-top:20px" id="results-breakdown"></div>
+  <div class="card" id="results-xp"></div>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button class="btn btn-secondary" style="flex:1" onclick="goHome()"><i class="fa-solid fa-house"></i> Menu</button>
+    <button class="btn btn-primary" style="flex:1" onclick="playAgain()"><i class="fa-solid fa-rotate-right"></i> Next</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ===================== BIBLE VERSE DATABASE =====================
+const BIBLE_DATABASE = [
+  { verse_text: "In the beginning God created the heavens and the earth.", testament: "Old", book: "Genesis", chapter: 1, verse: 1, adjacent_next: "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.", wrong_books: ["Exodus", "Leviticus", "Numbers"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [2, 3, 4, 5], category: "Genesis" },
+  { verse_text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.", testament: "New", book: "John", chapter: 3, verse: 16, adjacent_next: "For God did not send his Son into the world to condemn the world, but to save the world through him.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [1, 2, 4, 5], wrong_verses: [10, 15, 17, 18], category: "Gospel" },
+  { verse_text: "All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness.", testament: "New", book: "2 Timothy", chapter: 3, verse: 16, adjacent_next: "so that the servant of God may be thoroughly equipped for every good work.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [1, 2, 4, 5], wrong_verses: [14, 15, 17, 18], category: "Epistles" },
+  { verse_text: "Now we see only a reflection as in a mirror; then we shall see face to face. Now I know in part; then I shall know fully, even as I am fully known.", testament: "New", book: "1 Corinthians", chapter: 13, verse: 12, adjacent_next: "And now these three remain: faith, hope and love. But the greatest of these is love.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [11, 13, 14, 15], category: "Epistles" },
+  { verse_text: "The Lord is my shepherd, I lack nothing.", testament: "Old", book: "Psalms", chapter: 23, verse: 1, adjacent_next: "He makes me lie down in green pastures, he leads me beside quiet waters,", wrong_books: ["Job", "Proverbs", "Isaiah"], wrong_chapters: [22, 24, 25, 26], wrong_verses: [1, 2, 3, 4], category: "Poetry" },
+  { verse_text: "Jesus answered, 'I am the way and the truth and the life. No one comes to the Father except through me.'", testament: "New", book: "John", chapter: 14, verse: 6, adjacent_next: "If you really knew me, you would know my Father as well. From now on, you do know him and have seen him.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [13, 15, 16, 17], wrong_verses: [5, 7, 8, 9], category: "Gospel" },
+  { verse_text: "Therefore, as God's chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience.", testament: "New", book: "Colossians", chapter: 3, verse: 12, adjacent_next: "Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you.", wrong_books: ["Ephesians", "Philippians", "1 Thessalonians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [10, 11, 13, 14], category: "Epistles" },
+  { verse_text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", testament: "New", book: "Philippians", chapter: 4, verse: 6, adjacent_next: "And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [5, 7, 8, 9], category: "Epistles" },
+  { verse_text: "I can do all this through Christ, who gives me strength.", testament: "New", book: "Philippians", chapter: 4, verse: 13, adjacent_next: "Yet it was good of you to share in my troubles.", wrong_books: ["Colossians", "1 Timothy", "2 Timothy"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [11, 12, 14, 15], category: "Epistles" },
+  { verse_text: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control.", testament: "New", book: "Galatians", chapter: 5, verse: 22, adjacent_next: "Against such things there is no law.", wrong_books: ["Ephesians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [20, 21, 23, 24], category: "Epistles" },
+  { verse_text: "Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful.", testament: "New", book: "Colossians", chapter: 3, verse: 15, adjacent_next: "Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts.", wrong_books: ["Ephesians", "Philippians", "1 Thessalonians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [13, 14, 16, 17], category: "Epistles" },
+  { verse_text: "Trust in the Lord with all your heart and lean not on your own understanding;", testament: "Old", book: "Proverbs", chapter: 3, verse: 5, adjacent_next: "in all your ways submit to him, and he will make your paths straight.", wrong_books: ["Job", "Psalms", "Ecclesiastes"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [4, 6, 7, 8], category: "Wisdom" },
+  { verse_text: "Come to me, all you who are weary and burdened, and I will give you rest.", testament: "New", book: "Matthew", chapter: 11, verse: 28, adjacent_next: "Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [26, 27, 29, 30], category: "Gospel" },
+  { verse_text: "So whether you eat or drink or whatever you do, do it all for the glory of God.", testament: "New", book: "1 Corinthians", chapter: 10, verse: 31, adjacent_next: "Do not cause anyone to stumble, whether Jews, Greeks or the church of God—", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [29, 30, 32, 33], category: "Epistles" },
+  { verse_text: "For we know that in all things God works for the good of those who love him, who have been called according to his purpose.", testament: "New", book: "Romans", chapter: 8, verse: 28, adjacent_next: "For those God foreknew he also predestined to be conformed to the image of his Son, that he might be the firstborn among many brothers and sisters.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [26, 27, 29, 30], category: "Epistles" },
+  { verse_text: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!", testament: "New", book: "2 Corinthians", chapter: 5, verse: 17, adjacent_next: "All this is from God, who reconciled us to himself through Christ and gave us the ministry of reconciliation:", wrong_books: ["1 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [15, 16, 18, 19], category: "Epistles" },
+  { verse_text: "You, my brothers and sisters, were called to be free. But do not use your freedom to indulge the flesh; rather, serve one another humbly in love.", testament: "New", book: "Galatians", chapter: 5, verse: 13, adjacent_next: "For the entire law is fulfilled in keeping this one command: 'Love your neighbor as yourself.'", wrong_books: ["Ephesians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [11, 12, 14, 15], category: "Epistles" },
+  { verse_text: "Be completely humble and gentle; be patient, bearing with one another in love.", testament: "New", book: "Ephesians", chapter: 4, verse: 2, adjacent_next: "Make every effort to keep the unity of the Spirit through the bond of peace.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [1, 3, 4, 5], category: "Epistles" },
+  { verse_text: "I have been crucified with Christ and I no longer live, but Christ lives in me. The life I now live in the body, I live by faith in the Son of God, who loved me and gave himself for me.", testament: "New", book: "Galatians", chapter: 2, verse: 20, adjacent_next: "I do not set aside the grace of God, for if righteousness could be gained through the law, Christ died for nothing!", wrong_books: ["Romans", "1 Corinthians", "2 Corinthians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [18, 19, 21, 22], category: "Epistles" },
+  { verse_text: "Love never fails. But where there are prophecies, they will cease; where there are tongues, they will be stilled; where there is knowledge, it will pass away.", testament: "New", book: "1 Corinthians", chapter: 13, verse: 8, adjacent_next: "For we know in part and we prophesy in part,", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [6, 7, 9, 10], category: "Epistles" },
+  { verse_text: "In your anger do not sin: Do not let the sun go down while you are still angry,", testament: "New", book: "Ephesians", chapter: 4, verse: 26, adjacent_next: "and do not give the devil a foothold.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [24, 25, 27, 28], category: "Epistles" },
+  { verse_text: "I pray that out of his glorious riches he may strengthen you with power through his Spirit in your inner being,", testament: "New", book: "Ephesians", chapter: 3, verse: 16, adjacent_next: "so that Christ may dwell in your hearts through faith. And I pray that you, being rooted and established in love,", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [14, 15, 17, 18], category: "Epistles" },
+  { verse_text: "Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us,", testament: "New", book: "Ephesians", chapter: 3, verse: 20, adjacent_next: "to him be glory in the church and in Christ Jesus throughout all generations, for ever and ever! Amen.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [18, 19, 21, 22], category: "Epistles" },
+  { verse_text: "And God is able to bless you abundantly, so that in all things at all times, having all that you need, you will abound in every good work.", testament: "New", book: "2 Corinthians", chapter: 9, verse: 8, adjacent_next: "As it is written: 'They have freely scattered their gifts to the poor; their righteousness endures forever.'", wrong_books: ["1 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [8, 10, 11, 12], wrong_verses: [6, 7, 9, 10], category: "Epistles" },
+  { verse_text: "Therefore each of you must put off falsehood and speak truthfully to your neighbor, for we are all members of one body.", testament: "New", book: "Ephesians", chapter: 4, verse: 25, adjacent_next: "'In your anger do not sin': Do not let the sun go down while you are still angry,", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [23, 24, 26, 27], category: "Epistles" },
+  { verse_text: "For no one ever hated their own body, but they feed and care for their body, just as Christ does the church—", testament: "New", book: "Ephesians", chapter: 5, verse: 29, adjacent_next: "for we are members of his body.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [27, 28, 30, 31], category: "Epistles" },
+  { verse_text: "Submit to one another out of reverence for Christ.", testament: "New", book: "Ephesians", chapter: 5, verse: 21, adjacent_next: "Wives, submit yourselves to your own husbands as you do to the Lord.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [19, 20, 22, 23], category: "Epistles" },
+  { verse_text: "And the God of all grace, who called you to his eternal glory in Christ, after you have suffered a little while, will himself restore you and make you strong, firm and steadfast.", testament: "New", book: "1 Peter", chapter: 5, verse: 10, adjacent_next: "To him be the power for ever and ever. Amen.", wrong_books: ["2 Peter", "1 John", "2 John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [8, 9, 11, 12], category: "Epistles" },
+  { verse_text: "Praise be to the God and Father of our Lord Jesus Christ! In his great mercy he has given us new birth into a living hope through the resurrection of Jesus Christ from the dead,", testament: "New", book: "1 Peter", chapter: 1, verse: 3, adjacent_next: "and into an inheritance that can never perish, spoil or fade. This inheritance is kept in heaven for you,", wrong_books: ["2 Peter", "1 John", "2 John"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5], category: "Epistles" }, 
+    { verse_text: "And we declare to you what we have seen and heard so that you also may have fellowship with us; and truly our fellowship is with the Father and with his Son Jesus Christ.", testament: "New", book: "1 John", chapter: 1, verse: 3, adjacent_prev: "We declare to you what was from the beginning, what we have heard, what we have seen with our eyes, what we have looked at and touched with our hands, concerning the word of life—", adjacent_next: "We are writing these things so that our joy may be complete.", wrong_books: ["2 John", "3 John", "Revelation"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5] },
+  { verse_text: "No one has ever seen God; if we love one another, God lives in us, and his love is perfected in us.", testament: "New", book: "1 John", chapter: 4, verse: 12, adjacent_prev: "If we love one another, God lives in us, and his love is perfected in us.", adjacent_next: "By this we know that we abide in him and he in us, because he has given us of his Spirit.", wrong_books: ["2 John", "3 John", "Jude"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [10, 11, 13, 14] },
+  { verse_text: "For to me, to live is Christ and to die is gain.", testament: "New", book: "Philippians", chapter: 1, verse: 21, adjacent_prev: "It is my eager expectation and hope that I will not be put to shame in any way, but that by my speaking with all boldness, Christ will be exalted now as always in my body, whether by life or by death.", adjacent_next: "If I am to live in the flesh, that means fruitful labor for me; and I do not know which I prefer.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [19, 20, 22, 23] },
+  { verse_text: "Therefore, since we are surrounded by a great cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us,", testament: "New", book: "Hebrews", chapter: 12, verse: 1, adjacent_prev: "Therefore, since we are surrounded by a great cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us,", adjacent_next: "looking to Jesus the pioneer and perfecter of our faith, who for the sake of the joy that was set before him endured the cross, disregarding its shame, and has taken his seat at the right hand of the throne of God.", wrong_books: ["James", "1 Peter", "2 Peter"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [39, 40, 2, 3] },
+  { verse_text: "Now faith is the assurance of things hoped for, the conviction of things not seen.", testament: "New", book: "Hebrews", chapter: 11, verse: 1, adjacent_prev: "Now faith is the assurance of things hoped for, the conviction of things not seen.", adjacent_next: "Indeed, by faith our ancestors received approval.", wrong_books: ["James", "1 Peter", "2 Peter"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [39, 40, 2, 3] },
+  { verse_text: "But Jesus said, 'Let the little children come to me, and do not stop them; for it is to such as these that the kingdom of heaven belongs.'", testament: "New", book: "Matthew", chapter: 19, verse: 14, adjacent_prev: "Then little children were being brought to him in order that he might lay his hands on them and pray. But the disciples spoke sternly to those who brought them;", adjacent_next: "And he laid his hands on them and went on his way.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [12, 13, 15, 16] },
+  { verse_text: "Jesus looked at them and said, 'With man this is impossible, but with God all things are possible.'", testament: "New", book: "Matthew", chapter: 19, verse: 26, adjacent_prev: "Peter said to him, 'We have left everything and followed you. What then will we have?'", adjacent_next: "Jesus said to them, 'Truly I tell you, at the renewal of all things, when the Son of Man sits on his glorious throne, you who have followed me will also sit on twelve thrones, judging the twelve tribes of Israel.'", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [24, 25, 27, 28] },
+  { verse_text: "And God raised us up with Christ and seated us with him in the heavenly realms in Christ Jesus,", testament: "New", book: "Ephesians", chapter: 2, verse: 6, adjacent_prev: "And God raised us up with Christ and seated us with him in the heavenly realms in Christ Jesus,", adjacent_next: "in order that in the coming ages he might show the incomparable riches of his grace, expressed in his kindness to us in Christ Jesus.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [4, 5, 7, 8] },
+  { verse_text: "For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—", testament: "New", book: "Ephesians", chapter: 2, verse: 8, adjacent_prev: "For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—", adjacent_next: "not by works, so that no one can boast.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [6, 7, 9, 10] },
+  { verse_text: "But God demonstrates his own love for us in this: While we were still sinners, Christ died for us.", testament: "New", book: "Romans", chapter: 5, verse: 8, adjacent_prev: "Very rarely will anyone die for a righteous person, though for a good person someone might possibly dare to die.", adjacent_next: "Since we have now been justified by his blood, how much more shall we be saved from God's wrath through him!", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [6, 7, 9, 10] },
+  { verse_text: "For the wages of sin is death, but the gift of God is eternal life in Christ Jesus our Lord.", testament: "New", book: "Romans", chapter: 6, verse: 23, adjacent_prev: "You have been set free from sin and have become slaves to righteousness.", adjacent_next: "What shall we say, then? Shall we go on sinning so that grace may increase?", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [21, 22, 24, 25] },
+  { verse_text: "I have told you all this, so that you may find peace in your union with me. You will have troubles in the world. But be brave! I have defeated the world.", testament: "New", book: "John", chapter: 16, verse: 33, adjacent_prev: "I have told you all this, so that you may find peace in your union with me.", adjacent_next: "Jesus prayed with his face to the ground and said, 'My Father, if it is possible, let this cup of suffering pass by me. But let it not be what I want. Let it be what you want.'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [15, 17, 18, 19], wrong_verses: [31, 32, 34, 35] },
+  { verse_text: "Blessed are those who mourn, for they will be comforted.", testament: "New", book: "Matthew", chapter: 5, verse: 4, adjacent_prev: "Blessed are the poor in spirit, for theirs is the kingdom of heaven.", adjacent_next: "Blessed are the meek, for they will inherit the earth.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [2, 3, 5, 6] },
+  { verse_text: "Blessed are those who hunger and thirst for righteousness, for they will be filled.", testament: "New", book: "Matthew", chapter: 5, verse: 6, adjacent_prev: "Blessed are the meek, for they will inherit the earth.", adjacent_next: "Blessed are the merciful, for they will be shown mercy.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [4, 5, 7, 8] },
+  { verse_text: "Blessed are the merciful, for they will be shown mercy.", testament: "New", book: "Matthew", chapter: 5, verse: 7, adjacent_prev: "Blessed are those who hunger and thirst for righteousness, for they will be filled.", adjacent_next: "Blessed are the pure in heart, for they will see God.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [5, 6, 8, 9] },
+  { verse_text: "You are the light of the world. A town built on a hill cannot be hidden.", testament: "New", book: "Matthew", chapter: 5, verse: 14, adjacent_prev: "You are the salt of the earth. But if the salt loses its saltiness, how can it be made salty again? It is no longer good for anything, except to be thrown out and trampled underfoot.", adjacent_next: "Neither do people light a lamp and put it under a bowl. Instead they put it on its stand, and it gives light to everyone in the house.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [12, 13, 15, 16] },
+  { verse_text: "Seek first his kingdom and his righteousness, and all these things will be given to you as well.", testament: "New", book: "Matthew", chapter: 6, verse: 33, adjacent_prev: "So do not worry, saying, 'What shall we eat?' or 'What shall we drink?' or 'What shall we wear?'", adjacent_next: "Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [31, 32, 34, 35] },
+  { verse_text: "Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", testament: "New", book: "Matthew", chapter: 6, verse: 34, adjacent_prev: "So do not worry, saying, 'What shall we eat?' or 'What shall we drink?' or 'What shall we wear?'", adjacent_next: "Watch out for false prophets. They come to you in sheep's clothing, but inwardly they are ferocious wolves.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [32, 33, 35, 36] },
+  { verse_text: "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.", testament: "New", book: "Matthew", chapter: 7, verse: 7, adjacent_prev: "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.", adjacent_next: "For everyone who asks receives; the one who seeks finds; and to the one who knocks, the door will be opened.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [5, 6, 8, 9] },
+  { verse_text: "So in everything, do to others what you would have them do to you, for this sums up the Law and the Prophets.", testament: "New", book: "Matthew", chapter: 7, verse: 12, adjacent_prev: "So in everything, do to others what you would have them do to you, for this sums up the Law and the Prophets.", adjacent_next: "Enter through the narrow gate. For wide is the gate and broad is the road that leads to destruction, and many enter through it.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [10, 11, 13, 14] },
+  { verse_text: "But I tell you: Love your enemies and pray for those who persecute you,", testament: "New", book: "Matthew", chapter: 5, verse: 44, adjacent_prev: "You have heard that it was said, 'Love your neighbor and hate your enemy.'", adjacent_next: "that you may be children of your Father in heaven. He causes his sun to rise on the evil and the good, and sends rain on the righteous and the unrighteous.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [42, 43, 45, 46] },
+  { verse_text: "If you believe, you will receive whatever you ask for in prayer.", testament: "New", book: "Matthew", chapter: 21, verse: 22, adjacent_prev: "Jesus answered, 'I tell you the truth, if you believe, you will receive whatever you ask for in prayer.'", adjacent_next: "Jesus entered the temple courts and, while he was teaching, the chief priests and the elders of the people came to him. 'By what authority are you doing these things?' they asked. 'And who gave you this authority?'", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [20, 22, 23, 24], wrong_verses: [20, 21, 23, 24] },
+  { verse_text: "Go, therefore, and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit,", testament: "New", book: "Matthew", chapter: 28, verse: 19, adjacent_prev: "Then Jesus came to them and said, 'All authority in heaven and on earth has been given to me.'", adjacent_next: "and teaching them to obey everything I have commanded you. And surely I am with you always, to the very end of the age.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [27, 29, 30, 31], wrong_verses: [17, 18, 20, 21] },
+  { verse_text: "What good is it for someone to gain the whole world, yet forfeit their soul?", testament: "New", book: "Mark", chapter: 8, verse: 36, adjacent_prev: "If anyone is ashamed of me and my words in this adulterous and sinful generation, the Son of Man will be ashamed of them when he comes in his Father's glory with the holy angels.", adjacent_next: "Or what can anyone give in exchange for their soul?", wrong_books: ["Matthew", "Luke", "John"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [34, 35, 37, 38] },
+  { verse_text: "From the fullness of his grace we have all received grace in place of grace already given.", testament: "New", book: "John", chapter: 1, verse: 16, adjacent_prev: "The Word became flesh and made his dwelling among us. We have seen his glory, the glory of the one and only Son, who came from the Father, full of grace and truth.", adjacent_next: "For the law was given through Moses; grace and truth came through Jesus Christ.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [14, 15, 17, 18] },
+  { verse_text: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", testament: "New", book: "John", chapter: 8, verse: 31, adjacent_prev: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", adjacent_next: "Then you will know the truth, and the truth will set you free.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [29, 30, 32, 33] },
+  { verse_text: "Then you will know the truth, and the truth will set you free.", testament: "New", book: "John", chapter: 8, verse: 32, adjacent_prev: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", adjacent_next: "'We are Abraham's descendants and have never been slaves of anyone. How can you say that we shall be set free?'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [30, 31, 33, 34] },
+  { verse_text: "Very truly I tell you, everyone who sins is a slave to sin.", testament: "New", book: "John", chapter: 8, verse: 34, adjacent_prev: "'We are Abraham's descendants and have never been slaves of anyone. How can you say that we shall be set free?'", adjacent_next: "Now a slave has no permanent place in the family, but a son belongs to it forever.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [32, 33, 35, 36] },
+  { verse_text: "The thief comes only to steal and kill and destroy; I have come that they may have life, and to the full.", testament: "New", book: "John", chapter: 10, verse: 10, adjacent_prev: "Therefore Jesus said again, 'Very truly I tell you, I am the gate for the sheep.'", adjacent_next: "I am the good shepherd. The good shepherd lays down his life for the sheep.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [8, 9, 11, 12] },
+  { verse_text: "I am the good shepherd. The good shepherd lays down his life for the sheep.", testament: "New", book: "John", chapter: 10, verse: 11, adjacent_prev: "The thief comes only to steal and kill and destroy; I have come that they may have life, and to the full.", adjacent_next: "The hired hand is not the shepherd and does not own the sheep. So when he sees the wolf coming, he abandons the sheep and runs away. Then the wolf attacks the flock and scatters it.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [9, 10, 12, 13] },
+  { verse_text: "I am the resurrection and the life. The one who believes in me will live, even though they die;", testament: "New", book: "John", chapter: 11, verse: 25, adjacent_prev: "Jesus said to her, 'I am the resurrection and the life. The one who believes in me will live, even though they die;'", adjacent_next: "and whoever lives by believing in me will never die. Do you believe this?", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [23, 24, 26, 27] },
+  { verse_text: "Greater love has no one than this: to lay down one's life for one's friends.", testament: "New", book: "John", chapter: 15, verse: 13, adjacent_prev: "My command is this: Love each other as I have loved you.", adjacent_next: "You are my friends if you do what I command.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [14, 16, 17, 18], wrong_verses: [11, 12, 14, 15] },
+  { verse_text: "You did not choose me, but I chose you and appointed you so that you might go and bear fruit—fruit that will last.", testament: "New", book: "John", chapter: 15, verse: 16, adjacent_prev: "You are my friends if you do what I command.", adjacent_next: "Then the Father will give you whatever you ask in my name.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [14, 16, 17, 18], wrong_verses: [14, 15, 17, 18] },
+  { verse_text: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid.", testament: "New", book: "John", chapter: 14, verse: 27, adjacent_prev: "All this I have spoken while still with you. But the Advocate, the Holy Spirit, whom the Father will send in my name, will teach you all things and will remind you of everything I have said to you.", adjacent_next: "You heard me say, 'I am going away and I am coming back to you.' If you loved me, you would be glad for me, for I am going to the Father, for the Father is greater than I.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [13, 15, 16, 17], wrong_verses: [25, 26, 28, 29] },
+  { verse_text: "By this everyone will know that you are my disciples, if you love one another.", testament: "New", book: "John", chapter: 13, verse: 35, adjacent_prev: "A new command I give you: Love one another. As I have loved you, so you must love one another.", adjacent_next: "Simon Peter asked him, 'Lord, where are you going?' Jesus replied, 'Where I am going, you cannot follow now, but you will follow later.'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [33, 34, 36, 37] },
+  { verse_text: "For God did not give us a spirit of fear, but of power, of love and of a sound mind.", testament: "New", book: "2 Timothy", chapter: 1, verse: 7, adjacent_prev: "So do not be ashamed of the testimony about our Lord or of me his prisoner. Rather, join with me in suffering for the gospel, by the power of God.", adjacent_next: "So guard, through the Holy Spirit who lives in us, the good deposit that was entrusted to you.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [5, 6, 8, 9] },
+  { verse_text: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline.", testament: "New", book: "2 Timothy", chapter: 1, verse: 7, adjacent_prev: "So do not be ashamed of the testimony about our Lord or of me his prisoner. Rather, join with me in suffering for the gospel, by the power of God.", adjacent_next: "So guard, through the Holy Spirit who lives in us, the good deposit that was entrusted to you.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [5, 6, 8, 9] },
+  { verse_text: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", testament: "New", book: "Romans", chapter: 12, verse: 1, adjacent_prev: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", adjacent_next: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is—his good, pleasing and perfect will.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [39, 40, 2, 3] },
+  { verse_text: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is—his good, pleasing and perfect will.", testament: "New", book: "Romans", chapter: 12, verse: 2, adjacent_prev: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", adjacent_next: "For by the grace given me I say to every one of you: Do not think of yourself more highly than you ought, but rather think of yourself with sober judgment, in accordance with the faith God has distributed to each of you.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [40, 41, 3, 4] },
+  { verse_text: "For I am convinced that neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers,", testament: "New", book: "Romans", chapter: 8, verse: 38, adjacent_prev: "For I am convinced that neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers,", adjacent_next: "neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God that is in Christ Jesus our Lord.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [36, 37, 39, 40] },
+  { verse_text: "I can do all this through Christ, who gives me strength.", testament: "New", book: "Philippians", chapter: 4, verse: 13, adjacent_prev: "I rejoiced greatly in the Lord that at last you renewed your concern for me. Indeed, you were concerned, but you had no opportunity to show it.", adjacent_next: "Yet it was good of you to share in my troubles.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [11, 12, 14, 15] },
+  { verse_text: "Let your light shine before others, that they may see your good deeds and glorify your Father in heaven.", testament: "New", book: "Matthew", chapter: 5, verse: 16, adjacent_prev: "Neither do people light a lamp and put it under a bowl. Instead they put it on its stand, and it gives light to everyone in the house.", adjacent_next: "Do not think that I have come to abolish the Law or the Prophets; I have not come to abolish them but to fulfill them.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [14, 15, 17, 18] },
+  { verse_text: "Blessed are the peacemakers, for they will be called children of God.", testament: "New", book: "Matthew", chapter: 5, verse: 9, adjacent_prev: "Blessed are the pure in heart, for they will see God.", adjacent_next: "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [7, 8, 10, 11] },
+  { verse_text: "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven.", testament: "New", book: "Matthew", chapter: 5, verse: 10, adjacent_prev: "Blessed are the peacemakers, for they will be called children of God.", adjacent_next: "Blessed are you when people insult you, persecute you and falsely say all kinds of evil against you because of me.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [8, 9, 11, 12] },
+  { verse_text: "For the message of the cross is foolishness to those who are perishing, but to us who are being saved it is the power of God.", testament: "New", book: "1 Corinthians", chapter: 1, verse: 18, adjacent_prev: "For the message of the cross is foolishness to those who are perishing, but to us who are being saved it is the power of God.", adjacent_next: "For it is written: 'I will destroy the wisdom of the wise; the intelligence of the intelligent I will frustrate.'", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [16, 17, 19, 20] },
+  { verse_text: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", testament: "New", book: "1 Corinthians", chapter: 6, verse: 19, adjacent_prev: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", adjacent_next: "You are not your own; you were bought at a price. Therefore honor God with your bodies.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [17, 18, 20, 21] },
+  { verse_text: "You are not your own; you were bought at a price. Therefore honor God with your bodies.", testament: "New", book: "1 Corinthians", chapter: 6, verse: 20, adjacent_prev: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", adjacent_next: "Follow my example, as I follow the example of Christ.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [18, 19, 21, 22] },
+  { verse_text: "Every good and perfect gift is from above, coming down from the Father of the heavenly lights, who does not change like shifting shadows.", testament: "New", book: "James", chapter: 1, verse: 17, adjacent_prev: "Every good and perfect gift is from above, coming down from the Father of the heavenly lights, who does not change like shifting shadows.", adjacent_next: "He chose to give us birth through the word of truth, that we might be a kind of firstfruits of all he created.", wrong_books: ["1 Peter", "2 Peter", "1 John"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [15, 16, 18, 19] },
+  { verse_text: "Know therefore that the Lord your God is God; he is the faithful God, keeping his covenant of love to a thousand generations of those who love him and keep his commandments.", testament: "Old", book: "Deuteronomy", chapter: 7, verse: 9, adjacent_prev: "Know therefore that the Lord your God is God; he is the faithful God, keeping his covenant of love to a thousand generations of those who love him and keep his commandments.", adjacent_next: "But those who hate him he will repay to their face by destruction; he will not be slow to repay to their face those who hate him.", wrong_books: ["Exodus", "Leviticus", "Numbers"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [7, 8, 10, 11] },
+  { verse_text: "The heavens declare the glory of God; the skies proclaim the work of his hands.", testament: "Old", book: "Psalms", chapter: 19, verse: 1, adjacent_prev: "The heavens declare the glory of God; the skies proclaim the work of his hands.", adjacent_next: "Day after day they pour forth speech; night after night they reveal knowledge.", wrong_books: ["Job", "Proverbs", "Ecclesiastes"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [39, 40, 2, 3] },
+  { verse_text: "In the beginning was the Word, and the Word was with God, and the Word was God.", testament: "New", book: "John", chapter: 1, verse: 1, adjacent_prev: "In the beginning was the Word, and the Word was with God, and the Word was God.", adjacent_next: "He was with God in the beginning.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [39, 40, 2, 3] },
+  { verse_text: "He was with God in the beginning.", testament: "New", book: "John", chapter: 1, verse: 2, adjacent_prev: "In the beginning was the Word, and the Word was with God, and the Word was God.", adjacent_next: "Through him all things were made; without him nothing has been made that has been made.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [40, 41, 3, 4] },
+  { verse_text: "Through him all things were made; without him nothing has been made that has been made.", testament: "New", book: "John", chapter: 1, verse: 3, adjacent_prev: "He was with God in the beginning.", adjacent_next: "In him was life, and that life was the light of all mankind.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5] }
+];
+
+// ===================== STATE =====================
+const state = {
+  screen: 'home',
+  selectedGame: null,
+  selectedDiff: null,
+  loading: false,
+  xp: 0,
+  gamesPlayed: 0,
+  correctAnswers: 0,
+  totalAnswers: 0,
+  streak: 0,
+  bestStreak: 0,
+  currentData: null,
+  roundXP: 0,
+  roundBreakdown: [],
+  roundResults: [],
+  g1Step: 0,
+  g1Attempt: 0,
+  g1Options: [],
+  g2HintsUsed: 0,
+  g2Answered: false,
+};
+
+// ===================== BIBLE DATA =====================
+const OT_BOOKS = ['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth',
+  '1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther',
+  'Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations',
+  'Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk',
+  'Zephaniah','Haggai','Zechariah','Malachi'];
+
+const NT_BOOKS = ['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians',
+  'Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians',
+  '1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter',
+  '1 John','2 John','3 John','Jude','Revelation'];
+
+// ===================== LEVELS =====================
+const LEVELS = [
+  { name: 'Lamb', icon: '🐑', xp: 0 },
+  { name: 'Seeker', icon: '🔍', xp: 100 },
+  { name: 'Student', icon: '📖', xp: 250 },
+  { name: 'Scholar', icon: '📜', xp: 500 },
+  { name: 'Sage', icon: '🕊️', xp: 800 },
+  { name: 'Prophet', icon: '⚡', xp: 1200 },
+  { name: 'Apostle', icon: '👑', xp: 1800 }
+];
+
+const LOADING_MSGS = [
+  'Searching the scrolls…','Turning to a new page…','Opening the scriptures…',
+  'Seeking wisdom…','Unrolling the parchment…','By lamplight…'
+];
+
+function getLevel(xp) {
+  let lvl = LEVELS[0];
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; break; }
+  }
+  const idx = LEVELS.indexOf(lvl);
+  const nextLvl = idx < LEVELS.length - 1 ? LEVELS[idx + 1] : null;
+  const progress = nextLvl ? (xp - lvl.xp) / (nextLvl.xp - lvl.xp) : 1;
+  return { ...lvl, index: idx, nextXp: nextLvl ? nextLvl.xp : lvl.xp, progress: Math.min(1, progress) };
+}
+
+function addXP(amount) {
+  const oldLevel = getLevel(state.xp);
+  state.xp += amount;
+  const newLevel = getLevel(state.xp);
+  updateStats();
+  if (newLevel.index > oldLevel.index) {
+    setTimeout(() => showLevelUp(newLevel), 600);
+  }
+  showXPFloat(amount);
+}
+
+function showXPFloat(amount) {
+  const el = document.createElement('div');
+  el.className = 'xp-float';
+  el.textContent = '+' + amount + ' XP';
+  el.style.left = (Math.random() * 40 + 30) + '%';
+  el.style.top = '40%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+
+function showLevelUp(lvl) {
+  const overlay = document.createElement('div');
+  overlay.className = 'level-overlay';
+  overlay.innerHTML = `<div class="level-card">
+    <div class="new-level-icon">${lvl.icon}</div>
+    <h2>Level Up!</h2>
+    <p>You've reached <strong style="color:var(--gold-light)">${lvl.name}</strong></p>
+    <button class="btn btn-primary" onclick="this.closest('.level-overlay').remove()">Continue</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#caa328','#e8d15a','#2dd47a','#60a5fa','#f472b6','#a78bfa'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (Math.random() * 6 + 4) + 'px';
+    piece.style.height = (Math.random() * 6 + 4) + 'px';
+    piece.style.animationDelay = (Math.random() * 1) + 's';
+    piece.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3500);
+  }
+}
+
+function updateStats() {
+  const lvl = getLevel(state.xp);
+  document.getElementById('level-icon').textContent = lvl.icon;
+  document.getElementById('level-name').textContent = lvl.name;
+  document.getElementById('xp-current').textContent = state.xp;
+  document.getElementById('xp-next').textContent = lvl.nextXp;
+  document.getElementById('xp-bar').style.width = (lvl.progress * 100) + '%';
+  document.getElementById('stat-played').textContent = state.gamesPlayed;
+  const acc = state.totalAnswers > 0 ? Math.round(state.correctAnswers / state.totalAnswers * 100) : 0;
+  document.getElementById('stat-accuracy').textContent = acc + '%';
+  document.getElementById('stat-streak').innerHTML = state.streak + ' <span style="font-size:14px">🔥</span>';
+}
+
+// ===================== SCREENS =====================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  state.screen = name;
+  document.getElementById('app').scrollTop = 0;
+}
+
+function selectGame(game) {
+  state.selectedGame = game;
+  state.selectedDiff = null;
+  document.querySelectorAll('#game-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.game === game));
+  const diffSec = document.getElementById('difficulty-section');
+  if (game === 'neighbor') {
+    diffSec.style.display = '';
+    document.querySelectorAll('#diff-pills .pill').forEach(p => p.classList.remove('active'));
+    document.getElementById('start-btn').disabled = true;
+  } else {
+    diffSec.style.display = 'none';
+    document.getElementById('start-btn').disabled = false;
+  }
+}
+
+function selectDiff(diff) {
+  state.selectedDiff = diff;
+  document.querySelectorAll('#diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.diff === diff));
+  document.getElementById('start-btn').disabled = false;
+}
+
+function goHome() {
+  showScreen('home');
+  updateStats();
+}
+
+function playAgain() {
+  startGame();
+}
+
+// ===================== DATABASE FUNCTIONS =====================
+function getRandomVerse() {
+  return BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+}
+
+function getVersesByTestament(testament) {
+  return BIBLE_DATABASE.filter(v => v.testament === testament);
+}
+
+function generateDetectiveData(verse) {
+  // This verse already has wrong options in the database
+  return {
+    verse_text: verse.verse_text,
+    testament: verse.testament,
+    book: verse.book,
+    chapter: verse.chapter,
+    verse: verse.verse,
+    wrong_books: verse.wrong_books,
+    wrong_chapters: verse.wrong_chapters,
+    wrong_verses: verse.wrong_verses
+  };
+}
+
+function generateNeighborData(verse, difficulty) {
+  const data = {
+    verse_text: verse.verse_text,
+    book: verse.book,
+    chapter: verse.chapter,
+    verse: verse.verse,
+    direction: 'next',
+    hint_context: `From ${verse.book} - look for context about the passage.`
+  };
+
+  if (difficulty === 'veryhard') {
+    data.adjacent_text = verse.adjacent_next || "Look to the next verse in your Bible.";
+    data.adjacent_verse = verse.verse + 1;
+  } else if (difficulty === 'medium') {
+    data.correct_answer = verse.adjacent_next || "The next verse continues the thought.";
+    data.wrong_options = [
+      "This is a plausible continuation of the passage.",
+      "Another verse that fits thematically but is wrong.",
+      "A verse that sounds like it could follow here."
+    ];
+  } else {
+    // Easy
+    data.real_before = "The verse before it sets up the context.";
+    data.real_after = verse.adjacent_next || "The next verse continues naturally.";
+    data.fake_verse = "A convincing verse that sounds like it belongs.";
+    data.fake_position = Math.random() > 0.5 ? 'before' : 'after';
+  }
+
+  return data;
+}
+
+// ===================== START GAME =====================
+function startGame() {
+  showScreen('game');
+  state.roundXP = 0;
+  state.roundBreakdown = [];
+  state.roundResults = [];
+  state.g2HintsUsed = 0;
+  state.g2Answered = false;
+
+  if (state.selectedGame === 'detective') {
+    document.getElementById('game-title').textContent = 'Verse Detective';
+    document.getElementById('game-score-mini').textContent = '';
+    state.g1Step = 0;
+    state.g1Attempt = 0;
+    renderG1Steps();
+    
+    const randomVerse = getRandomVerse();
+    const data = generateDetectiveData(randomVerse);
+    state.currentData = data;
+    initDetectiveRound(data);
+  } else if (state.selectedGame === 'neighbor') {
+    const diff = state.selectedDiff;
+    const diffLabels = { easy: 'Easy', medium: 'Medium', veryhard: 'Very Hard' };
+    document.getElementById('game-title').textContent = 'Verse Neighbor — ' + diffLabels[diff];
+    document.getElementById('game-score-mini').textContent = '';
+    document.getElementById('step-indicator').innerHTML = '';
+
+    const randomVerse = getRandomVerse();
+    const data = generateNeighborData(randomVerse, diff);
+    state.currentData = data;
+
+    if (diff === 'veryhard') {
+      initNeighborVHard(data);
+    } else if (diff === 'medium') {
+      initNeighborMedium(data);
+    } else {
+      initNeighborEasy(data);
+    }
+  }
+}
+
+// ===================== GAME 1: VERSE DETECTIVE =====================
+function renderG1Steps() {
+  const steps = ['Testament', 'Book', 'Chapter', 'Verse'];
+  document.getElementById('step-indicator').innerHTML = steps.map((_, i) => {
+    let cls = 'step-dot';
+    if (i < state.g1Step) {
+      const res = state.roundResults[i];
+      cls += res && res.firstTry ? ' done' : ' wrong';
+    } else if (i === state.g1Step) {
+      cls += ' active';
+    }
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function initDetectiveRound(data) {
+  state.g1Step = 0;
+  state.g1Attempt = 0;
+  renderG1Steps();
+  renderDetectiveStep();
+}
+
+function renderDetectiveStep() {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  renderG1Steps();
+
+  if (state.g1Step === 0) {
+    gc.innerHTML = `
+      <div class="verse-card card-glow"><div class="verse-text">${escHtml(data.verse_text)}</div></div>
+      <div class="question-label">Which Testament?</div>
+      <div class="options-row">
+        <button class="option-btn" onclick="guessTestament('Old')" id="opt-old">
+          <span class="opt-letter">O</span><span>Old Testament</span></button>
+        <button class="option-btn" onclick="guessTestament('New')" id="opt-new">
+          <span class="opt-letter">N</span><span>New Testament</span></button>
+      </div>`;
+  } else if (state.g1Step === 1) {
+    renderBookStep();
+  } else if (state.g1Step === 2) {
+    renderNumberStep('chapter');
+  } else if (state.g1Step === 3) {
+    renderNumberStep('verse');
+  } else {
+    finishDetective();
+  }
+}
+
+function guessTestament(guess) {
+  const correct = state.currentData.testament;
+  const isCorrect = guess.toLowerCase() === correct.toLowerCase();
+  document.getElementById('opt-old').disabled = true;
+  document.getElementById('opt-new').disabled = true;
+  if (isCorrect) {
+    document.getElementById('opt-' + guess.toLowerCase()).classList.add('correct');
+    state.roundResults[0] = { firstTry: true, correct: true };
+    state.roundBreakdown.push({ label: 'Testament', xp: 10 });
+    state.roundXP += 10;
+    state.correctAnswers++;
+  } else {
+    document.getElementById('opt-' + guess.toLowerCase()).classList.add('wrong');
+    document.getElementById('opt-' + correct.toLowerCase()).classList.add('correct');
+    state.roundResults[0] = { firstTry: false, correct: false };
+  }
+  state.totalAnswers++;
+  showFeedback(isCorrect);
+  setTimeout(() => {
+    state.g1Step = 1;
+    state.g1Attempt = 0;
+    renderDetectiveStep();
+  }, 1200);
+}
+
+function renderBookStep() {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const testament = data.testament;
+  const books = testament.toLowerCase() === 'old' ? OT_BOOKS : NT_BOOKS;
+
+  if (state.g1Attempt === 0) {
+    gc.innerHTML = `
+      <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
+        <div class="verse-ref">${testament} Testament</div></div>
+      <div class="question-label">Which Book?</div>
+      <div class="question-sub">Type to search from ${testament} Testament books</div>
+      <div class="input-wrap">
+        <input type="text" class="input-field" id="book-input" placeholder="Start typing a book name…"
+          autocomplete="off" oninput="filterBooks()" onfocus="filterBooks()">
+        <div class="search-dropdown" id="book-dropdown"></div>
+      </div>
+      <button class="btn btn-primary btn-full" id="book-submit-btn" onclick="submitBook()" disabled>Submit</button>`;
+    populateBookDropdown(books);
+  } else {
+    renderBookChoices();
+  }
+}
+
+let selectedBook = '';
+
+function populateBookDropdown(books) {
+  const dd = document.getElementById('book-dropdown');
+  dd.innerHTML = books.map(b => `<div class="search-item" onclick="pickBook('${escAttr(b)}')">${b}</div>`).join('');
+}
+
+function filterBooks() {
+  const input = document.getElementById('book-input');
+  const dd = document.getElementById('book-dropdown');
+  const val = input.value.toLowerCase().trim();
+  const testament = state.currentData.testament;
+  const books = testament.toLowerCase() === 'old' ? OT_BOOKS : NT_BOOKS;
+  const filtered = val ? books.filter(b => b.toLowerCase().includes(val)) : books;
+  dd.innerHTML = filtered.map(b => `<div class="search-item" onclick="pickBook('${escAttr(b)}')">${b}</div>`).join('');
+  dd.classList.toggle('open', filtered.length > 0 && document.activeElement === input);
+  if (val && !books.some(b => b.toLowerCase() === val)) {
+    selectedBook = '';
+    document.getElementById('book-submit-btn').disabled = true;
+  }
+}
+
+function pickBook(name) {
+  document.getElementById('book-input').value = name;
+  document.getElementById('book-dropdown').classList.remove('open');
+  selectedBook = name;
+  document.getElementById('book-submit-btn').disabled = false;
+}
+
+function submitBook() {
+  if (!selectedBook) return;
+  const correct = state.currentData.book;
+  const isCorrect = selectedBook.toLowerCase() === correct.toLowerCase();
+  if (isCorrect) {
+    state.roundResults[1] = { firstTry: true, correct: true };
+    state.roundBreakdown.push({ label: 'Book (1st try)', xp: 50 });
+    state.roundXP += 50;
+    state.correctAnswers++;
+    state.totalAnswers++;
+    showFeedback(true);
+    setTimeout(() => { state.g1Step = 2; state.g1Attempt = 0; renderDetectiveStep(); }, 1000);
+  } else {
+    state.g1Attempt = 1;
+    state.totalAnswers++;
+    showFeedback(false);
+    state.g1Options = buildOptions(correct, state.currentData.wrong_books, 5);
+    setTimeout(() => renderBookChoices(), 800);
+  }
+}
+
+function renderBookChoices() {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const opts = state.g1Options;
+  gc.innerHTML = `
+    <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${data.testament} Testament</div></div>
+    <div class="question-label">Which Book?</div>
+    <div class="question-sub">${state.g1Attempt === 1 ? 'Pick from these options' : 'Narrowed down — try again'}</div>
+    <div class="options-grid" id="book-options">
+      ${opts.map((o, i) => o.eliminated ? `<button class="option-btn eliminated" disabled><span class="opt-letter">✗</span><span>${escHtml(o.value)}</span></button>` :
+        `<button class="option-btn" onclick="guessBookOption(${i})" id="bopt-${i}"><span class="opt-letter">${String.fromCharCode(65 + i)}</span><span>${escHtml(o.value)}</span></button>`
+      ).join('')}
+    </div>`;
+}
+
+function guessBookOption(idx) {
+  const correct = state.currentData.book;
+  const opt = state.g1Options[idx];
+  const isCorrect = opt.value.toLowerCase() === correct.toLowerCase();
+  document.querySelectorAll('#book-options .option-btn').forEach(b => { b.disabled = true; });
+
+  if (isCorrect) {
+    document.getElementById('bopt-' + idx).classList.add('correct');
+    const xp = state.g1Attempt === 1 ? 30 : 15;
+    state.roundResults[1] = { firstTry: false, correct: true, attempts: state.g1Attempt + 1 };
+    state.roundBreakdown.push({ label: `Book (attempt ${state.g1Attempt + 1})`, xp });
+    state.roundXP += xp;
+    state.correctAnswers++;
+    state.totalAnswers++;
+    showFeedback(true);
+    setTimeout(() => { state.g1Step = 2; state.g1Attempt = 0; renderDetectiveStep(); }, 1000);
+  } else {
+    document.getElementById('bopt-' + idx).classList.add('wrong');
+    state.totalAnswers++;
+    showFeedback(false);
+    opt.eliminated = true;
+    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    if (wrongOpts.length > 0) {
+      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
+    }
+    state.g1Attempt++;
+    setTimeout(() => renderBookChoices(), 800);
+  }
+}
+
+function renderNumberStep(type) {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const refParts = [data.testament + ' Testament', data.book];
+  if (type === 'verse') refParts.push('Chapter ' + data.chapter);
+
+  if (state.g1Attempt === 0) {
+    gc.innerHTML = `
+      <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
+        <div class="verse-ref">${refParts.join(' · ')}</div></div>
+      <div class="question-label">Which ${type === 'chapter' ? 'Chapter' : 'Verse'}?</div>
+      <div class="question-sub">Enter the ${type} number</div>
+      <div class="input-wrap">
+        <input type="number" class="input-field" id="num-input" placeholder="Enter number…" min="1"
+          onkeydown="if(event.key==='Enter')submitNumber('${type}')">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="submitNumber('${type}')">Submit</button>`;
+  } else {
+    renderNumberChoices(type);
+  }
+}
+
+function submitNumber(type) {
+  const input = document.getElementById('num-input');
+  const guess = parseInt(input.value);
+  if (!guess || guess < 1) return;
+  const correct = type === 'chapter' ? state.currentData.chapter : state.currentData.verse;
+  const stepIdx = type === 'chapter' ? 2 : 3;
+
+  if (guess === correct) {
+    const xp = type === 'chapter' ? 40 : 40;
+    state.roundResults[stepIdx] = { firstTry: true, correct: true };
+    state.roundBreakdown.push({ label: `${type === 'chapter' ? 'Chapter' : 'Verse'} (1st try)`, xp });
+    state.roundXP += xp;
+    state.correctAnswers++;
+    state.totalAnswers++;
+    showFeedback(true);
+    setTimeout(() => { state.g1Step = stepIdx + 1; state.g1Attempt = 0; renderDetectiveStep(); }, 1000);
+  } else {
+    state.g1Attempt = 1;
+    state.totalAnswers++;
+    showFeedback(false);
+    const wrongNums = type === 'chapter' ? state.currentData.wrong_chapters : state.currentData.wrong_verses;
+    state.g1Options = buildOptions(correct, wrongNums.map(String), 5);
+    setTimeout(() => renderNumberChoices(type), 800);
+  }
+}
+
+function renderNumberChoices(type) {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const correct = type === 'chapter' ? data.chapter : data.verse;
+  const refParts = [data.testament + ' Testament', data.book];
+  if (type === 'verse') refParts.push('Chapter ' + data.chapter);
+  const opts = state.g1Options;
+
+  gc.innerHTML = `
+    <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${refParts.join(' · ')}</div></div>
+    <div class="question-label">Which ${type === 'chapter' ? 'Chapter' : 'Verse'}?</div>
+    <div class="question-sub">${state.g1Attempt === 1 ? 'Pick from these options' : 'Narrowed down — try again'}</div>
+    <div class="options-grid" id="num-options">
+      ${opts.map((o, i) => o.eliminated ? `<button class="option-btn eliminated" disabled><span class="opt-letter">✗</span><span>${escHtml(String(o.value))}</span></button>` :
+        `<button class="option-btn" onclick="guessNumOption(${i},'${type}')" id="nopt-${i}"><span class="opt-letter">${String.fromCharCode(65 + i)}</span><span>${escHtml(String(o.value))}</span></button>`
+      ).join('')}
+    </div>`;
+}
+
+function guessNumOption(idx, type) {
+  const correct = type === 'chapter' ? state.currentData.chapter : state.currentData.verse;
+  const opt = state.g1Options[idx];
+  const isCorrect = String(opt.value) === String(correct);
+  const stepIdx = type === 'chapter' ? 2 : 3;
+  document.querySelectorAll('#num-options .option-btn').forEach(b => { b.disabled = true; });
+
+  if (isCorrect) {
+    document.getElementById('nopt-' + idx).classList.add('correct');
+    const xp = state.g1Attempt === 1 ? 25 : 10;
+    state.roundResults[stepIdx] = { firstTry: false, correct: true, attempts: state.g1Attempt + 1 };
+    state.roundBreakdown.push({ label: `${type === 'chapter' ? 'Chapter' : 'Verse'} (attempt ${state.g1Attempt + 1})`, xp });
+    state.roundXP += xp;
+    state.correctAnswers++;
+    state.totalAnswers++;
+    showFeedback(true);
+    setTimeout(() => { state.g1Step = stepIdx + 1; state.g1Attempt = 0; renderDetectiveStep(); }, 1000);
+  } else {
+    document.getElementById('nopt-' + idx).classList.add('wrong');
+    state.totalAnswers++;
+    showFeedback(false);
+    opt.eliminated = true;
+    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    if (wrongOpts.length > 0) {
+      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
+    }
+    state.g1Attempt++;
+    setTimeout(() => renderNumberChoices(type), 800);
+  }
+}
+
+function finishDetective() {
+  const data = state.currentData;
+  const allFirst = state.roundResults.every(r => r && r.firstTry);
+  if (allFirst) {
+    state.roundBreakdown.push({ label: 'Perfect Round Bonus', xp: 50 });
+    state.roundXP += 50;
+  }
+  if (allFirst) {
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    const streakBonus = Math.min(state.streak * 5, 50);
+    if (streakBonus > 0) {
+      state.roundBreakdown.push({ label: `Streak Bonus (×${state.streak})`, xp: streakBonus });
+      state.roundXP += streakBonus;
+    }
+  } else {
+    state.streak = 0;
+  }
+  state.gamesPlayed++;
+  addXP(state.roundXP);
+  showResults('detective', data);
+}
+
+// ===================== GAME 2: VERSE NEIGHBOR =====================
+
+function initNeighborVHard(data) {
+  state.g2HintsUsed = 0;
+  state.g2Answered = false;
+  const gc = document.getElementById('game-content');
+  const dirLabel = data.direction === 'next' ? 'next' : 'previous';
+  gc.innerHTML = `
+    <div class="verse-card">
+      <div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div id="vhard-hints-display"></div>
+    </div>
+    <div class="question-label">Type the ${dirLabel} verse from memory</div>
+    <div class="hints-row">
+      <button class="hint-btn" id="hint1-btn" onclick="useVHardHint(1)"><i class="fa-solid fa-lightbulb"></i> Hint 1: Verse #</button>
+      <button class="hint-btn" id="hint2-btn" onclick="useVHardHint(2)" disabled><i class="fa-solid fa-lightbulb"></i> Hint 2: Chapter</button>
+      <button class="hint-btn" id="hint3-btn" onclick="useVHardHint(3)" disabled><i class="fa-solid fa-lightbulb"></i> Hint 3: Book</button>
+    </div>
+    <textarea class="input-field" id="vhard-input" placeholder="Type the verse as you remember it…"></textarea>
+    <button class="btn btn-primary btn-full" onclick="submitVHard()" id="vhard-submit">Submit Answer</button>`;
+}
+
+function useVHardHint(num) {
+  const data = state.currentData;
+  state.g2HintsUsed = Math.max(state.g2HintsUsed, num);
+  const display = document.getElementById('vhard-hints-display');
+  let hints = '';
+  if (state.g2HintsUsed >= 1) {
+    hints += `<div class="hint-reveal">Verse ${data.adjacent_verse}</div>`;
+    document.getElementById('hint1-btn').classList.add('used');
+    document.getElementById('hint1-btn').disabled = true;
+    document.getElementById('hint2-btn').disabled = false;
+  }
+  if (state.g2HintsUsed >= 2) {
+    hints += `<div class="hint-reveal">Chapter ${data.chapter}</div>`;
+    document.getElementById('hint2-btn').classList.add('used');
+    document.getElementById('hint2-btn').disabled = true;
+    document.getElementById('hint3-btn').disabled = false;
+  }
+  if (state.g2HintsUsed >= 3) {
+    hints += `<div class="hint-reveal">${data.book}</div>`;
+    document.getElementById('hint3-btn').classList.add('used');
+    document.getElementById('hint3-btn').disabled = true;
+  }
+  display.innerHTML = hints;
+}
+
+function submitVHard() {
+  const userText = document.getElementById('vhard-input').value.trim();
+  if (!userText) return;
+  state.g2Answered = true;
+  const data = state.currentData;
+  const correct = data.adjacent_text;
+  const result = compareTexts(userText, correct);
+
+  if (result.accuracy < 0.2) {
+    showTooHardModal(result, correct);
+  } else {
+    showVHardResults(result, correct);
+  }
+}
+
+function showTooHardModal(result, correct) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>That was a tough one!</h3>
+      <p>Your answer was ${Math.round(result.accuracy * 100)}% accurate. Would you like to see the full results or try an easier difficulty?</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="this.closest('.modal-overlay').remove();showVHardResults(window._vhResult, window._vhCorrect)">See Results</button>
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="this.closest('.modal-overlay').remove();state.selectedDiff='medium';startGame()">Try Easier</button>
+      </div>
+    </div>`;
+  window._vhResult = result;
+  window._vhCorrect = correct;
+  document.body.appendChild(modal);
+}
+
+function showVHardResults(result, correct) {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const pct = Math.round(result.accuracy * 100);
+  const badgeClass = pct >= 80 ? 'high' : pct >= 40 ? 'med' : 'low';
+
+  let xp = 0;
+  if (pct >= 80) xp = 100;
+  else if (pct >= 50) xp = 50;
+  else if (pct >= 20) xp = 20;
+  const hintPenalty = state.g2HintsUsed * 10;
+  xp = Math.max(0, xp - hintPenalty);
+
+  state.roundXP = xp;
+  state.roundBreakdown = [{ label: `Accuracy ${pct}%`, xp: xp + hintPenalty }];
+  if (hintPenalty > 0) state.roundBreakdown.push({ label: `Hint penalty (${state.g2HintsUsed} hints)`, xp: -hintPenalty });
+
+  if (pct >= 50) { state.correctAnswers++; state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else { state.streak = 0; }
+  state.totalAnswers++;
+  state.gamesPlayed++;
+
+  gc.innerHTML = `
+    <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse}</div></div>
+    <div style="text-align:center">
+      <div class="accuracy-badge ${badgeClass}"><i class="fa-solid fa-${pct >= 50 ? 'check' : 'xmark'}"></i> ${pct}% Accurate</div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:8px">Correct Verse</div>
+      <div class="compare-block">${result.correctHtml}</div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:8px">Your Answer</div>
+      <div class="compare-block">${result.userHtml}</div>
+    </div>
+    <div class="card xp-breakdown">
+      ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+      <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn btn-secondary" style="flex:1" onclick="goHome()"><i class="fa-solid fa-house"></i> Menu</button>
+      <button class="btn btn-primary" style="flex:1" onclick="playAgain()"><i class="fa-solid fa-rotate-right"></i> Next</button>
+    </div>`;
+  addXP(state.roundXP);
+}
+
+function initNeighborMedium(data) {
+  state.g2HintsUsed = 0;
+  state.g2Answered = false;
+  const options = shuffleArray([data.correct_answer, ...data.wrong_options]);
+  state.g1Options = options.map(o => ({ value: o, eliminated: false, isCorrect: o === data.correct_answer }));
+  renderMediumQuestion();
+}
+
+function renderMediumQuestion() {
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+  const opts = state.g1Options;
+  gc.innerHTML = `
+    <div class="verse-card">
+      <div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div id="med-hint-display"></div>
+    </div>
+    <div class="question-label">Which verse is adjacent?</div>
+    <div class="question-sub">One of these comes right ${data.direction === 'next' ? 'after' : 'before'} the verse above</div>
+    <div class="hints-row">
+      <button class="hint-btn" id="med-hint-btn" onclick="useMedHint()" ${state.g2HintsUsed > 0 ? 'disabled class="hint-btn used"' : ''}>
+        <i class="fa-solid fa-lightbulb"></i> Hint: Direction</button>
+    </div>
+    <div class="options-grid" id="med-options">
+      ${opts.map((o, i) => o.eliminated ?
+        `<button class="option-btn eliminated" disabled><span class="opt-letter">✗</span><span style="font-family:var(--font-verse)">${escHtml(o.value)}</span></button>` :
+        `<button class="option-btn" onclick="guessMedOption(${i})" id="mopt-${i}"><span class="opt-letter">${String.fromCharCode(65 + i)}</span><span style="font-family:var(--font-verse)">${escHtml(o.value)}</span></button>`
+      ).join('')}
+    </div>`;
+  if (state.g2HintsUsed > 0) {
+    document.getElementById('med-hint-display').innerHTML = `<div class="hint-reveal">The answer is the ${data.direction} verse</div>`;
+  }
+}
+
+function useMedHint() {
+  state.g2HintsUsed = 1;
+  document.getElementById('med-hint-btn').classList.add('used');
+  document.getElementById('med-hint-btn').disabled = true;
+  document.getElementById('med-hint-display').innerHTML =
+    `<div class="hint-reveal">The answer is the ${state.currentData.direction} verse</div>`;
+}
+
+function guessMedOption(idx) {
+  const opt = state.g1Options[idx];
+  const isCorrect = opt.isCorrect;
+  document.querySelectorAll('#med-options .option-btn').forEach(b => { b.disabled = true; });
+
+  if (isCorrect) {
+    document.getElementById('mopt-' + idx).classList.add('correct');
+    const xp = state.g2HintsUsed === 0 ? 60 : 40;
+    state.roundXP = xp;
+    state.roundBreakdown = [{ label: 'Correct answer', xp: 60 }];
+    if (state.g2HintsUsed > 0) state.roundBreakdown.push({ label: 'Hint penalty', xp: -20 });
+    state.correctAnswers++;
+    state.totalAnswers++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    state.gamesPlayed++;
+    showFeedback(true);
+    addXP(state.roundXP);
+    setTimeout(() => showResults('neighbor-medium', state.currentData), 1200);
+  } else {
+    document.getElementById('mopt-' + idx).classList.add('wrong');
+    state.totalAnswers++;
+    showFeedback(false);
+    opt.eliminated = true;
+    const wrongOpts = state.g1Options.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
+    if (wrongOpts.length > 0) {
+      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
+    }
+    setTimeout(() => renderMediumQuestion(), 800);
+  }
+}
+
+function initNeighborEasy(data) {
+  state.g2HintsUsed = 0;
+  state.g2Answered = false;
+  let beforeText, afterText, realDir;
+  if (data.fake_position === 'before') {
+    beforeText = data.fake_verse;
+    afterText = data.real_after;
+    realDir = 'after';
+  } else {
+    beforeText = data.real_before;
+    afterText = data.fake_verse;
+    realDir = 'before';
+  }
+  state._easySetup = { beforeText, afterText, realDir };
+  renderEasyQuestion();
+}
+
+function renderEasyQuestion() {
+  const data = state.currentData;
+  const s = state._easySetup;
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="verse-card card-glow">
+      <div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse}</div>
+    </div>
+    <div class="question-label">One is real, one is fake</div>
+    <div class="question-sub">Tap the verse you believe is genuine</div>
+    <div class="hints-row">
+      <button class="hint-btn" id="easy-hint-btn" onclick="useEasyHint()" ${state.g2HintsUsed > 0 ? 'disabled class="hint-btn used"' : ''}>
+        <i class="fa-solid fa-lightbulb"></i> Hint: Context</button>
+    </div>
+    <div id="easy-hint-display"></div>
+    <div id="easy-options">
+      <div class="verse-option" onclick="guessEasy('before')" id="eopt-before">
+        <div class="vo-label"><i class="fa-solid fa-arrow-up"></i> Verse Before</div>
+        <div class="vo-text">${escHtml(s.beforeText)}</div>
+      </div>
+      <div class="verse-option" onclick="guessEasy('after')" id="eopt-after">
+        <div class="vo-label"><i class="fa-solid fa-arrow-down"></i> Verse After</div>
+        <div class="vo-text">${escHtml(s.afterText)}</div>
+      </div>
+    </div>`;
+  if (state.g2HintsUsed > 0) {
+    document.getElementById('easy-hint-display').innerHTML =
+      `<div class="hint-reveal">${escHtml(data.hint_context)}</div>`;
+  }
+}
+
+function useEasyHint() {
+  state.g2HintsUsed = 1;
+  document.getElementById('easy-hint-btn').classList.add('used');
+  document.getElementById('easy-hint-btn').disabled = true;
+  document.getElementById('easy-hint-display').innerHTML =
+    `<div class="hint-reveal">${escHtml(state.currentData.hint_context)}</div>`;
+}
+
+function guessEasy(dir) {
+  if (state.g2Answered) return;
+  state.g2Answered = true;
+  const s = state._easySetup;
+  const isCorrect = dir === s.realDir;
+
+  document.getElementById('eopt-' + dir).classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.getElementById('eopt-' + s.realDir).classList.add('correct');
+  }
+
+  const xp = isCorrect ? (state.g2HintsUsed === 0 ? 30 : 20) : 0;
+  state.roundXP = xp;
+  state.roundBreakdown = [];
+  if (isCorrect) {
+    state.roundBreakdown.push({ label: 'Correct answer', xp: 30 });
+    if (state.g2HintsUsed > 0) state.roundBreakdown.push({ label: 'Hint penalty', xp: -10 });
+    state.correctAnswers++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  } else {
+    state.streak = 0;
+  }
+  state.totalAnswers++;
+  state.gamesPlayed++;
+  showFeedback(isCorrect);
+  addXP(state.roundXP);
+  setTimeout(() => showResults('neighbor-easy', state.currentData), 1400);
+}
+
+// ===================== RESULTS =====================
+function showResults(gameType, data) {
+  showScreen('results');
+  const isDetective = gameType === 'detective';
+  const bd = document.getElementById('results-breakdown');
+  const xpDiv = document.getElementById('results-xp');
+
+  if (isDetective) {
+    const allFirst = state.roundResults.every(r => r && r.firstTry);
+    document.getElementById('results-icon').textContent = allFirst ? '🏆' : '📖';
+    document.getElementById('results-title').textContent = allFirst ? 'Perfect Round!' : 'Round Complete';
+    document.getElementById('results-sub').textContent = `${data.book} ${data.chapter}:${data.verse}`;
+
+    const labels = ['Testament', 'Book', 'Chapter', 'Verse'];
+    const values = [data.testament, data.book, data.chapter, data.verse];
+    bd.innerHTML = labels.map((l, i) => {
+      const r = state.roundResults[i];
+      const ok = r && r.firstTry;
+      return `<div class="result-row"><span class="result-label">${l}</span>
+        <span class="result-value ${ok ? 'correct' : 'wrong'}">${ok ? '✓' : '✗'} ${values[i]}${r && r.attempts ? ' (attempt ' + r.attempts + ')' : ''}</span></div>`;
+    }).join('');
+  } else {
+    const isCorrectRound = state.roundXP > 0;
+    document.getElementById('results-icon').textContent = isCorrectRound ? '✨' : '📚';
+    document.getElementById('results-title').textContent = isCorrectRound ? 'Well Done!' : 'Keep Learning!';
+    document.getElementById('results-sub').textContent = `${data.book} ${data.chapter}:${data.verse}`;
+    bd.innerHTML = `<div class="verse-card" style="margin:0"><div class="verse-text" style="font-size:15px">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse}</div></div>`;
+  }
+
+  xpDiv.innerHTML = `<div class="xp-breakdown">
+    ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+    <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+  </div>`;
+}
+
+// ===================== TEXT COMPARISON (LCS) =====================
+function compareTexts(userText, correctText) {
+  const normalize = t => t.toLowerCase().replace(/[^\w\s']/g, '').replace(/\s+/g, ' ').trim();
+  const userWords = normalize(userText).split(' ').filter(Boolean);
+  const correctWords = normalize(correctText).split(' ').filter(Boolean);
+
+  if (userWords.length === 0 || correctWords.length === 0) {
+    return { accuracy: 0, userHtml: escHtml(userText), correctHtml: escHtml(correctText) };
+  }
+
+  const m = userWords.length, n = correctWords.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (userWords[i - 1] === correctWords[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+      else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+
+  const matchedUser = new Set();
+  const matchedCorrect = new Set();
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (userWords[i - 1] === correctWords[j - 1]) {
+      matchedUser.add(i - 1);
+      matchedCorrect.add(j - 1);
+      i--; j--;
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  const accuracy = dp[m][n] / Math.max(m, n);
+  const origUserWords = userText.replace(/\s+/g, ' ').trim().split(' ');
+  const origCorrectWords = correctText.replace(/\s+/g, ' ').trim().split(' ');
+
+  const userHtml = origUserWords.map((w, idx) =>
+    idx < userWords.length && matchedUser.has(idx)
+      ? `<span class="word-correct">${escHtml(w)}</span>`
+      : `<span class="word-wrong">${escHtml(w)}</span>`
+  ).join(' ');
+
+  const correctHtml = origCorrectWords.map((w, idx) =>
+    idx < correctWords.length && matchedCorrect.has(idx)
+      ? `<span class="word-correct">${escHtml(w)}</span>`
+      : `<span class="word-missing">${escHtml(w)}</span>`
+  ).join(' ');
+
+  return { accuracy, userHtml, correctHtml };
+}
+
+// ===================== HELPERS =====================
+function buildOptions(correct, wrongValues, count) {
+  const wrongArr = wrongValues.slice(0, count - 1);
+  const all = [{ value: correct, eliminated: false, isCorrect: true },
+    ...wrongArr.map(v => ({ value: v, eliminated: false, isCorrect: false }))];
+  return shuffleArray(all);
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function escHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function escAttr(text) {
+  return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function showFeedback(isCorrect) {
+  const fb = document.createElement('div');
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  fb.innerHTML = isCorrect
+    ? '<i class="fa-solid fa-check"></i> Correct!'
+    : '<i class="fa-solid fa-xmark"></i> Not quite';
+  document.body.appendChild(fb);
+  setTimeout(() => fb.remove(), 1200);
+}
+
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('book-dropdown');
+  if (dd && !e.target.closest('.input-wrap')) {
+    dd.classList.remove('open');
+  }
+});
+
+function init() {
+  updateStats();
+}
+
+init();
+</script>
+</body>
+</html>
