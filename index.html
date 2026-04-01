@@ -42,6 +42,7 @@ body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-prima
 @keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)}}
 @keyframes confettiDrop{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(calc(100vh)) rotate(720deg);opacity:0}}
 @keyframes scaleIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .app-icon{font-size:28px;color:var(--gold);margin-bottom:4px;filter:drop-shadow(0 0 8px var(--gold-glow))}
 .app-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--gold-light);
@@ -79,8 +80,6 @@ body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-prima
 .btn-primary:active{transform:translateY(0)}
 .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1.5px solid var(--border)}
 .btn-secondary:hover{border-color:var(--border-active);background:var(--bg-card-hover)}
-.btn-success{background:var(--success);color:#0a0f1e}
-.btn-error{background:var(--error);color:#fff}
 .btn-sm{padding:10px 18px;font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 .btn-full{width:100%}
@@ -166,12 +165,11 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 .accuracy-badge.med{background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.35)}
 .accuracy-badge.low{background:var(--error-bg);color:var(--error);border:1px solid var(--error-border)}
 
-.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px}
-.loading-dots{display:flex;gap:8px}
-.loading-dots span{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulse 1.2s ease-in-out infinite}
-.loading-dots span:nth-child(2){animation-delay:.2s}
-.loading-dots span:nth-child(3){animation-delay:.4s}
-.loading-text{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);font-size:14px}
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:20px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--gold);
+  border-radius:50%;animation:spin 0.8s linear infinite}
+.loading-text{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);font-size:15px;text-align:center}
+.loading-sub{font-size:12px;color:var(--text-muted);text-align:center}
 
 .feedback{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:var(--radius-pill);
   font-weight:700;font-size:14px;z-index:100;animation:slideUp .3s ease;pointer-events:none;
@@ -232,6 +230,11 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 .verse-option.correct .vo-label{color:var(--success)}
 .verse-option.wrong{border-color:var(--error-border);background:var(--error-bg);animation:shake .4s}
 .verse-option.wrong .vo-label{color:var(--error)}
+
+.error-card{background:var(--error-bg);border:1px solid var(--error-border);border-radius:var(--radius);
+  padding:20px;text-align:center;margin:20px 0}
+.error-card h3{color:var(--error);font-family:var(--font-display);margin-bottom:8px}
+.error-card p{color:var(--text-secondary);font-size:14px;margin-bottom:16px}
 
 @media(max-width:380px){
   .app-title{font-size:22px;letter-spacing:2px}
@@ -295,7 +298,7 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     <i class="fa-solid fa-play"></i> Begin
   </button>
   <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px">
-    Verses from Bible Database &middot; Scores saved this session
+    Live verses from bible-api.com (WEB translation) &middot; Scores saved locally
   </p>
 </div>
 
@@ -329,107 +332,148 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 </div>
 
 <script>
-// ===================== BIBLE VERSE DATABASE =====================
-const BIBLE_DATABASE = [
-  { verse_text: "In the beginning God created the heavens and the earth.", testament: "Old", book: "Genesis", chapter: 1, verse: 1, adjacent_next: "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.", wrong_books: ["Exodus", "Leviticus", "Numbers"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [2, 3, 4, 5], category: "Genesis" },
-  { verse_text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.", testament: "New", book: "John", chapter: 3, verse: 16, adjacent_next: "For God did not send his Son into the world to condemn the world, but to save the world through him.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [1, 2, 4, 5], wrong_verses: [10, 15, 17, 18], category: "Gospel" },
-  { verse_text: "All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness.", testament: "New", book: "2 Timothy", chapter: 3, verse: 16, adjacent_next: "so that the servant of God may be thoroughly equipped for every good work.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [1, 2, 4, 5], wrong_verses: [14, 15, 17, 18], category: "Epistles" },
-  { verse_text: "Now we see only a reflection as in a mirror; then we shall see face to face. Now I know in part; then I shall know fully, even as I am fully known.", testament: "New", book: "1 Corinthians", chapter: 13, verse: 12, adjacent_next: "And now these three remain: faith, hope and love. But the greatest of these is love.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [11, 13, 14, 15], category: "Epistles" },
-  { verse_text: "The Lord is my shepherd, I lack nothing.", testament: "Old", book: "Psalms", chapter: 23, verse: 1, adjacent_next: "He makes me lie down in green pastures, he leads me beside quiet waters,", wrong_books: ["Job", "Proverbs", "Isaiah"], wrong_chapters: [22, 24, 25, 26], wrong_verses: [1, 2, 3, 4], category: "Poetry" },
-  { verse_text: "Jesus answered, 'I am the way and the truth and the life. No one comes to the Father except through me.'", testament: "New", book: "John", chapter: 14, verse: 6, adjacent_next: "If you really knew me, you would know my Father as well. From now on, you do know him and have seen him.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [13, 15, 16, 17], wrong_verses: [5, 7, 8, 9], category: "Gospel" },
-  { verse_text: "Therefore, as God's chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience.", testament: "New", book: "Colossians", chapter: 3, verse: 12, adjacent_next: "Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you.", wrong_books: ["Ephesians", "Philippians", "1 Thessalonians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [10, 11, 13, 14], category: "Epistles" },
-  { verse_text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", testament: "New", book: "Philippians", chapter: 4, verse: 6, adjacent_next: "And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [5, 7, 8, 9], category: "Epistles" },
-  { verse_text: "I can do all this through Christ, who gives me strength.", testament: "New", book: "Philippians", chapter: 4, verse: 13, adjacent_next: "Yet it was good of you to share in my troubles.", wrong_books: ["Colossians", "1 Timothy", "2 Timothy"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [11, 12, 14, 15], category: "Epistles" },
-  { verse_text: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control.", testament: "New", book: "Galatians", chapter: 5, verse: 22, adjacent_next: "Against such things there is no law.", wrong_books: ["Ephesians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [20, 21, 23, 24], category: "Epistles" },
-  { verse_text: "Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful.", testament: "New", book: "Colossians", chapter: 3, verse: 15, adjacent_next: "Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts.", wrong_books: ["Ephesians", "Philippians", "1 Thessalonians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [13, 14, 16, 17], category: "Epistles" },
-  { verse_text: "Trust in the Lord with all your heart and lean not on your own understanding;", testament: "Old", book: "Proverbs", chapter: 3, verse: 5, adjacent_next: "in all your ways submit to him, and he will make your paths straight.", wrong_books: ["Job", "Psalms", "Ecclesiastes"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [4, 6, 7, 8], category: "Wisdom" },
-  { verse_text: "Come to me, all you who are weary and burdened, and I will give you rest.", testament: "New", book: "Matthew", chapter: 11, verse: 28, adjacent_next: "Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [26, 27, 29, 30], category: "Gospel" },
-  { verse_text: "So whether you eat or drink or whatever you do, do it all for the glory of God.", testament: "New", book: "1 Corinthians", chapter: 10, verse: 31, adjacent_next: "Do not cause anyone to stumble, whether Jews, Greeks or the church of God—", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [29, 30, 32, 33], category: "Epistles" },
-  { verse_text: "For we know that in all things God works for the good of those who love him, who have been called according to his purpose.", testament: "New", book: "Romans", chapter: 8, verse: 28, adjacent_next: "For those God foreknew he also predestined to be conformed to the image of his Son, that he might be the firstborn among many brothers and sisters.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [26, 27, 29, 30], category: "Epistles" },
-  { verse_text: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!", testament: "New", book: "2 Corinthians", chapter: 5, verse: 17, adjacent_next: "All this is from God, who reconciled us to himself through Christ and gave us the ministry of reconciliation:", wrong_books: ["1 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [15, 16, 18, 19], category: "Epistles" },
-  { verse_text: "You, my brothers and sisters, were called to be free. But do not use your freedom to indulge the flesh; rather, serve one another humbly in love.", testament: "New", book: "Galatians", chapter: 5, verse: 13, adjacent_next: "For the entire law is fulfilled in keeping this one command: 'Love your neighbor as yourself.'", wrong_books: ["Ephesians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [11, 12, 14, 15], category: "Epistles" },
-  { verse_text: "Be completely humble and gentle; be patient, bearing with one another in love.", testament: "New", book: "Ephesians", chapter: 4, verse: 2, adjacent_next: "Make every effort to keep the unity of the Spirit through the bond of peace.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [1, 3, 4, 5], category: "Epistles" },
-  { verse_text: "I have been crucified with Christ and I no longer live, but Christ lives in me. The life I now live in the body, I live by faith in the Son of God, who loved me and gave himself for me.", testament: "New", book: "Galatians", chapter: 2, verse: 20, adjacent_next: "I do not set aside the grace of God, for if righteousness could be gained through the law, Christ died for nothing!", wrong_books: ["Romans", "1 Corinthians", "2 Corinthians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [18, 19, 21, 22], category: "Epistles" },
-  { verse_text: "Love never fails. But where there are prophecies, they will cease; where there are tongues, they will be stilled; where there is knowledge, it will pass away.", testament: "New", book: "1 Corinthians", chapter: 13, verse: 8, adjacent_next: "For we know in part and we prophesy in part,", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [6, 7, 9, 10], category: "Epistles" },
-  { verse_text: "In your anger do not sin: Do not let the sun go down while you are still angry,", testament: "New", book: "Ephesians", chapter: 4, verse: 26, adjacent_next: "and do not give the devil a foothold.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [24, 25, 27, 28], category: "Epistles" },
-  { verse_text: "I pray that out of his glorious riches he may strengthen you with power through his Spirit in your inner being,", testament: "New", book: "Ephesians", chapter: 3, verse: 16, adjacent_next: "so that Christ may dwell in your hearts through faith. And I pray that you, being rooted and established in love,", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [14, 15, 17, 18], category: "Epistles" },
-  { verse_text: "Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us,", testament: "New", book: "Ephesians", chapter: 3, verse: 20, adjacent_next: "to him be glory in the church and in Christ Jesus throughout all generations, for ever and ever! Amen.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [2, 4, 5, 6], wrong_verses: [18, 19, 21, 22], category: "Epistles" },
-  { verse_text: "And God is able to bless you abundantly, so that in all things at all times, having all that you need, you will abound in every good work.", testament: "New", book: "2 Corinthians", chapter: 9, verse: 8, adjacent_next: "As it is written: 'They have freely scattered their gifts to the poor; their righteousness endures forever.'", wrong_books: ["1 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [8, 10, 11, 12], wrong_verses: [6, 7, 9, 10], category: "Epistles" },
-  { verse_text: "Therefore each of you must put off falsehood and speak truthfully to your neighbor, for we are all members of one body.", testament: "New", book: "Ephesians", chapter: 4, verse: 25, adjacent_next: "'In your anger do not sin': Do not let the sun go down while you are still angry,", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [23, 24, 26, 27], category: "Epistles" },
-  { verse_text: "For no one ever hated their own body, but they feed and care for their body, just as Christ does the church—", testament: "New", book: "Ephesians", chapter: 5, verse: 29, adjacent_next: "for we are members of his body.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [27, 28, 30, 31], category: "Epistles" },
-  { verse_text: "Submit to one another out of reverence for Christ.", testament: "New", book: "Ephesians", chapter: 5, verse: 21, adjacent_next: "Wives, submit yourselves to your own husbands as you do to the Lord.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [19, 20, 22, 23], category: "Epistles" },
-  { verse_text: "And the God of all grace, who called you to his eternal glory in Christ, after you have suffered a little while, will himself restore you and make you strong, firm and steadfast.", testament: "New", book: "1 Peter", chapter: 5, verse: 10, adjacent_next: "To him be the power for ever and ever. Amen.", wrong_books: ["2 Peter", "1 John", "2 John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [8, 9, 11, 12], category: "Epistles" },
-  { verse_text: "Praise be to the God and Father of our Lord Jesus Christ! In his great mercy he has given us new birth into a living hope through the resurrection of Jesus Christ from the dead,", testament: "New", book: "1 Peter", chapter: 1, verse: 3, adjacent_next: "and into an inheritance that can never perish, spoil or fade. This inheritance is kept in heaven for you,", wrong_books: ["2 Peter", "1 John", "2 John"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5], category: "Epistles" }, 
-    { verse_text: "And we declare to you what we have seen and heard so that you also may have fellowship with us; and truly our fellowship is with the Father and with his Son Jesus Christ.", testament: "New", book: "1 John", chapter: 1, verse: 3, adjacent_prev: "We declare to you what was from the beginning, what we have heard, what we have seen with our eyes, what we have looked at and touched with our hands, concerning the word of life—", adjacent_next: "We are writing these things so that our joy may be complete.", wrong_books: ["2 John", "3 John", "Revelation"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5] },
-  { verse_text: "No one has ever seen God; if we love one another, God lives in us, and his love is perfected in us.", testament: "New", book: "1 John", chapter: 4, verse: 12, adjacent_prev: "If we love one another, God lives in us, and his love is perfected in us.", adjacent_next: "By this we know that we abide in him and he in us, because he has given us of his Spirit.", wrong_books: ["2 John", "3 John", "Jude"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [10, 11, 13, 14] },
-  { verse_text: "For to me, to live is Christ and to die is gain.", testament: "New", book: "Philippians", chapter: 1, verse: 21, adjacent_prev: "It is my eager expectation and hope that I will not be put to shame in any way, but that by my speaking with all boldness, Christ will be exalted now as always in my body, whether by life or by death.", adjacent_next: "If I am to live in the flesh, that means fruitful labor for me; and I do not know which I prefer.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [19, 20, 22, 23] },
-  { verse_text: "Therefore, since we are surrounded by a great cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us,", testament: "New", book: "Hebrews", chapter: 12, verse: 1, adjacent_prev: "Therefore, since we are surrounded by a great cloud of witnesses, let us also lay aside every weight and the sin that clings so closely, and let us run with perseverance the race that is set before us,", adjacent_next: "looking to Jesus the pioneer and perfecter of our faith, who for the sake of the joy that was set before him endured the cross, disregarding its shame, and has taken his seat at the right hand of the throne of God.", wrong_books: ["James", "1 Peter", "2 Peter"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [39, 40, 2, 3] },
-  { verse_text: "Now faith is the assurance of things hoped for, the conviction of things not seen.", testament: "New", book: "Hebrews", chapter: 11, verse: 1, adjacent_prev: "Now faith is the assurance of things hoped for, the conviction of things not seen.", adjacent_next: "Indeed, by faith our ancestors received approval.", wrong_books: ["James", "1 Peter", "2 Peter"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [39, 40, 2, 3] },
-  { verse_text: "But Jesus said, 'Let the little children come to me, and do not stop them; for it is to such as these that the kingdom of heaven belongs.'", testament: "New", book: "Matthew", chapter: 19, verse: 14, adjacent_prev: "Then little children were being brought to him in order that he might lay his hands on them and pray. But the disciples spoke sternly to those who brought them;", adjacent_next: "And he laid his hands on them and went on his way.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [12, 13, 15, 16] },
-  { verse_text: "Jesus looked at them and said, 'With man this is impossible, but with God all things are possible.'", testament: "New", book: "Matthew", chapter: 19, verse: 26, adjacent_prev: "Peter said to him, 'We have left everything and followed you. What then will we have?'", adjacent_next: "Jesus said to them, 'Truly I tell you, at the renewal of all things, when the Son of Man sits on his glorious throne, you who have followed me will also sit on twelve thrones, judging the twelve tribes of Israel.'", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [24, 25, 27, 28] },
-  { verse_text: "And God raised us up with Christ and seated us with him in the heavenly realms in Christ Jesus,", testament: "New", book: "Ephesians", chapter: 2, verse: 6, adjacent_prev: "And God raised us up with Christ and seated us with him in the heavenly realms in Christ Jesus,", adjacent_next: "in order that in the coming ages he might show the incomparable riches of his grace, expressed in his kindness to us in Christ Jesus.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [4, 5, 7, 8] },
-  { verse_text: "For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—", testament: "New", book: "Ephesians", chapter: 2, verse: 8, adjacent_prev: "For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—", adjacent_next: "not by works, so that no one can boast.", wrong_books: ["Galatians", "Philippians", "Colossians"], wrong_chapters: [1, 3, 4, 5], wrong_verses: [6, 7, 9, 10] },
-  { verse_text: "But God demonstrates his own love for us in this: While we were still sinners, Christ died for us.", testament: "New", book: "Romans", chapter: 5, verse: 8, adjacent_prev: "Very rarely will anyone die for a righteous person, though for a good person someone might possibly dare to die.", adjacent_next: "Since we have now been justified by his blood, how much more shall we be saved from God's wrath through him!", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [6, 7, 9, 10] },
-  { verse_text: "For the wages of sin is death, but the gift of God is eternal life in Christ Jesus our Lord.", testament: "New", book: "Romans", chapter: 6, verse: 23, adjacent_prev: "You have been set free from sin and have become slaves to righteousness.", adjacent_next: "What shall we say, then? Shall we go on sinning so that grace may increase?", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [21, 22, 24, 25] },
-  { verse_text: "I have told you all this, so that you may find peace in your union with me. You will have troubles in the world. But be brave! I have defeated the world.", testament: "New", book: "John", chapter: 16, verse: 33, adjacent_prev: "I have told you all this, so that you may find peace in your union with me.", adjacent_next: "Jesus prayed with his face to the ground and said, 'My Father, if it is possible, let this cup of suffering pass by me. But let it not be what I want. Let it be what you want.'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [15, 17, 18, 19], wrong_verses: [31, 32, 34, 35] },
-  { verse_text: "Blessed are those who mourn, for they will be comforted.", testament: "New", book: "Matthew", chapter: 5, verse: 4, adjacent_prev: "Blessed are the poor in spirit, for theirs is the kingdom of heaven.", adjacent_next: "Blessed are the meek, for they will inherit the earth.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [2, 3, 5, 6] },
-  { verse_text: "Blessed are those who hunger and thirst for righteousness, for they will be filled.", testament: "New", book: "Matthew", chapter: 5, verse: 6, adjacent_prev: "Blessed are the meek, for they will inherit the earth.", adjacent_next: "Blessed are the merciful, for they will be shown mercy.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [4, 5, 7, 8] },
-  { verse_text: "Blessed are the merciful, for they will be shown mercy.", testament: "New", book: "Matthew", chapter: 5, verse: 7, adjacent_prev: "Blessed are those who hunger and thirst for righteousness, for they will be filled.", adjacent_next: "Blessed are the pure in heart, for they will see God.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [5, 6, 8, 9] },
-  { verse_text: "You are the light of the world. A town built on a hill cannot be hidden.", testament: "New", book: "Matthew", chapter: 5, verse: 14, adjacent_prev: "You are the salt of the earth. But if the salt loses its saltiness, how can it be made salty again? It is no longer good for anything, except to be thrown out and trampled underfoot.", adjacent_next: "Neither do people light a lamp and put it under a bowl. Instead they put it on its stand, and it gives light to everyone in the house.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [12, 13, 15, 16] },
-  { verse_text: "Seek first his kingdom and his righteousness, and all these things will be given to you as well.", testament: "New", book: "Matthew", chapter: 6, verse: 33, adjacent_prev: "So do not worry, saying, 'What shall we eat?' or 'What shall we drink?' or 'What shall we wear?'", adjacent_next: "Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [31, 32, 34, 35] },
-  { verse_text: "Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", testament: "New", book: "Matthew", chapter: 6, verse: 34, adjacent_prev: "So do not worry, saying, 'What shall we eat?' or 'What shall we drink?' or 'What shall we wear?'", adjacent_next: "Watch out for false prophets. They come to you in sheep's clothing, but inwardly they are ferocious wolves.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [32, 33, 35, 36] },
-  { verse_text: "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.", testament: "New", book: "Matthew", chapter: 7, verse: 7, adjacent_prev: "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.", adjacent_next: "For everyone who asks receives; the one who seeks finds; and to the one who knocks, the door will be opened.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [5, 6, 8, 9] },
-  { verse_text: "So in everything, do to others what you would have them do to you, for this sums up the Law and the Prophets.", testament: "New", book: "Matthew", chapter: 7, verse: 12, adjacent_prev: "So in everything, do to others what you would have them do to you, for this sums up the Law and the Prophets.", adjacent_next: "Enter through the narrow gate. For wide is the gate and broad is the road that leads to destruction, and many enter through it.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [10, 11, 13, 14] },
-  { verse_text: "But I tell you: Love your enemies and pray for those who persecute you,", testament: "New", book: "Matthew", chapter: 5, verse: 44, adjacent_prev: "You have heard that it was said, 'Love your neighbor and hate your enemy.'", adjacent_next: "that you may be children of your Father in heaven. He causes his sun to rise on the evil and the good, and sends rain on the righteous and the unrighteous.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [42, 43, 45, 46] },
-  { verse_text: "If you believe, you will receive whatever you ask for in prayer.", testament: "New", book: "Matthew", chapter: 21, verse: 22, adjacent_prev: "Jesus answered, 'I tell you the truth, if you believe, you will receive whatever you ask for in prayer.'", adjacent_next: "Jesus entered the temple courts and, while he was teaching, the chief priests and the elders of the people came to him. 'By what authority are you doing these things?' they asked. 'And who gave you this authority?'", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [20, 22, 23, 24], wrong_verses: [20, 21, 23, 24] },
-  { verse_text: "Go, therefore, and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit,", testament: "New", book: "Matthew", chapter: 28, verse: 19, adjacent_prev: "Then Jesus came to them and said, 'All authority in heaven and on earth has been given to me.'", adjacent_next: "and teaching them to obey everything I have commanded you. And surely I am with you always, to the very end of the age.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [27, 29, 30, 31], wrong_verses: [17, 18, 20, 21] },
-  { verse_text: "What good is it for someone to gain the whole world, yet forfeit their soul?", testament: "New", book: "Mark", chapter: 8, verse: 36, adjacent_prev: "If anyone is ashamed of me and my words in this adulterous and sinful generation, the Son of Man will be ashamed of them when he comes in his Father's glory with the holy angels.", adjacent_next: "Or what can anyone give in exchange for their soul?", wrong_books: ["Matthew", "Luke", "John"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [34, 35, 37, 38] },
-  { verse_text: "From the fullness of his grace we have all received grace in place of grace already given.", testament: "New", book: "John", chapter: 1, verse: 16, adjacent_prev: "The Word became flesh and made his dwelling among us. We have seen his glory, the glory of the one and only Son, who came from the Father, full of grace and truth.", adjacent_next: "For the law was given through Moses; grace and truth came through Jesus Christ.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [14, 15, 17, 18] },
-  { verse_text: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", testament: "New", book: "John", chapter: 8, verse: 31, adjacent_prev: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", adjacent_next: "Then you will know the truth, and the truth will set you free.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [29, 30, 32, 33] },
-  { verse_text: "Then you will know the truth, and the truth will set you free.", testament: "New", book: "John", chapter: 8, verse: 32, adjacent_prev: "To the Jews who had believed him, Jesus said, 'If you hold to my teaching, you are really my disciples.'", adjacent_next: "'We are Abraham's descendants and have never been slaves of anyone. How can you say that we shall be set free?'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [30, 31, 33, 34] },
-  { verse_text: "Very truly I tell you, everyone who sins is a slave to sin.", testament: "New", book: "John", chapter: 8, verse: 34, adjacent_prev: "'We are Abraham's descendants and have never been slaves of anyone. How can you say that we shall be set free?'", adjacent_next: "Now a slave has no permanent place in the family, but a son belongs to it forever.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [32, 33, 35, 36] },
-  { verse_text: "The thief comes only to steal and kill and destroy; I have come that they may have life, and to the full.", testament: "New", book: "John", chapter: 10, verse: 10, adjacent_prev: "Therefore Jesus said again, 'Very truly I tell you, I am the gate for the sheep.'", adjacent_next: "I am the good shepherd. The good shepherd lays down his life for the sheep.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [8, 9, 11, 12] },
-  { verse_text: "I am the good shepherd. The good shepherd lays down his life for the sheep.", testament: "New", book: "John", chapter: 10, verse: 11, adjacent_prev: "The thief comes only to steal and kill and destroy; I have come that they may have life, and to the full.", adjacent_next: "The hired hand is not the shepherd and does not own the sheep. So when he sees the wolf coming, he abandons the sheep and runs away. Then the wolf attacks the flock and scatters it.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [9, 11, 12, 13], wrong_verses: [9, 10, 12, 13] },
-  { verse_text: "I am the resurrection and the life. The one who believes in me will live, even though they die;", testament: "New", book: "John", chapter: 11, verse: 25, adjacent_prev: "Jesus said to her, 'I am the resurrection and the life. The one who believes in me will live, even though they die;'", adjacent_next: "and whoever lives by believing in me will never die. Do you believe this?", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [10, 12, 13, 14], wrong_verses: [23, 24, 26, 27] },
-  { verse_text: "Greater love has no one than this: to lay down one's life for one's friends.", testament: "New", book: "John", chapter: 15, verse: 13, adjacent_prev: "My command is this: Love each other as I have loved you.", adjacent_next: "You are my friends if you do what I command.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [14, 16, 17, 18], wrong_verses: [11, 12, 14, 15] },
-  { verse_text: "You did not choose me, but I chose you and appointed you so that you might go and bear fruit—fruit that will last.", testament: "New", book: "John", chapter: 15, verse: 16, adjacent_prev: "You are my friends if you do what I command.", adjacent_next: "Then the Father will give you whatever you ask in my name.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [14, 16, 17, 18], wrong_verses: [14, 15, 17, 18] },
-  { verse_text: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid.", testament: "New", book: "John", chapter: 14, verse: 27, adjacent_prev: "All this I have spoken while still with you. But the Advocate, the Holy Spirit, whom the Father will send in my name, will teach you all things and will remind you of everything I have said to you.", adjacent_next: "You heard me say, 'I am going away and I am coming back to you.' If you loved me, you would be glad for me, for I am going to the Father, for the Father is greater than I.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [13, 15, 16, 17], wrong_verses: [25, 26, 28, 29] },
-  { verse_text: "By this everyone will know that you are my disciples, if you love one another.", testament: "New", book: "John", chapter: 13, verse: 35, adjacent_prev: "A new command I give you: Love one another. As I have loved you, so you must love one another.", adjacent_next: "Simon Peter asked him, 'Lord, where are you going?' Jesus replied, 'Where I am going, you cannot follow now, but you will follow later.'", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [12, 14, 15, 16], wrong_verses: [33, 34, 36, 37] },
-  { verse_text: "For God did not give us a spirit of fear, but of power, of love and of a sound mind.", testament: "New", book: "2 Timothy", chapter: 1, verse: 7, adjacent_prev: "So do not be ashamed of the testimony about our Lord or of me his prisoner. Rather, join with me in suffering for the gospel, by the power of God.", adjacent_next: "So guard, through the Holy Spirit who lives in us, the good deposit that was entrusted to you.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [5, 6, 8, 9] },
-  { verse_text: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline.", testament: "New", book: "2 Timothy", chapter: 1, verse: 7, adjacent_prev: "So do not be ashamed of the testimony about our Lord or of me his prisoner. Rather, join with me in suffering for the gospel, by the power of God.", adjacent_next: "So guard, through the Holy Spirit who lives in us, the good deposit that was entrusted to you.", wrong_books: ["1 Timothy", "Titus", "Philemon"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [5, 6, 8, 9] },
-  { verse_text: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", testament: "New", book: "Romans", chapter: 12, verse: 1, adjacent_prev: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", adjacent_next: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is—his good, pleasing and perfect will.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [39, 40, 2, 3] },
-  { verse_text: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is—his good, pleasing and perfect will.", testament: "New", book: "Romans", chapter: 12, verse: 2, adjacent_prev: "Therefore, I urge you, brothers and sisters, in view of God's mercy, to offer your bodies as a living sacrifice, holy and pleasing to God—this is your true and proper worship.", adjacent_next: "For by the grace given me I say to every one of you: Do not think of yourself more highly than you ought, but rather think of yourself with sober judgment, in accordance with the faith God has distributed to each of you.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [11, 13, 14, 15], wrong_verses: [40, 41, 3, 4] },
-  { verse_text: "For I am convinced that neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers,", testament: "New", book: "Romans", chapter: 8, verse: 38, adjacent_prev: "For I am convinced that neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers,", adjacent_next: "neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God that is in Christ Jesus our Lord.", wrong_books: ["1 Corinthians", "2 Corinthians", "Galatians"], wrong_chapters: [7, 9, 10, 11], wrong_verses: [36, 37, 39, 40] },
-  { verse_text: "I can do all this through Christ, who gives me strength.", testament: "New", book: "Philippians", chapter: 4, verse: 13, adjacent_prev: "I rejoiced greatly in the Lord that at last you renewed your concern for me. Indeed, you were concerned, but you had no opportunity to show it.", adjacent_next: "Yet it was good of you to share in my troubles.", wrong_books: ["Colossians", "1 Thessalonians", "2 Thessalonians"], wrong_chapters: [3, 5, 6, 7], wrong_verses: [11, 12, 14, 15] },
-  { verse_text: "Let your light shine before others, that they may see your good deeds and glorify your Father in heaven.", testament: "New", book: "Matthew", chapter: 5, verse: 16, adjacent_prev: "Neither do people light a lamp and put it under a bowl. Instead they put it on its stand, and it gives light to everyone in the house.", adjacent_next: "Do not think that I have come to abolish the Law or the Prophets; I have not come to abolish them but to fulfill them.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [14, 15, 17, 18] },
-  { verse_text: "Blessed are the peacemakers, for they will be called children of God.", testament: "New", book: "Matthew", chapter: 5, verse: 9, adjacent_prev: "Blessed are the pure in heart, for they will see God.", adjacent_next: "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [7, 8, 10, 11] },
-  { verse_text: "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven.", testament: "New", book: "Matthew", chapter: 5, verse: 10, adjacent_prev: "Blessed are the peacemakers, for they will be called children of God.", adjacent_next: "Blessed are you when people insult you, persecute you and falsely say all kinds of evil against you because of me.", wrong_books: ["Mark", "Luke", "John"], wrong_chapters: [4, 6, 7, 8], wrong_verses: [8, 9, 11, 12] },
-  { verse_text: "For the message of the cross is foolishness to those who are perishing, but to us who are being saved it is the power of God.", testament: "New", book: "1 Corinthians", chapter: 1, verse: 18, adjacent_prev: "For the message of the cross is foolishness to those who are perishing, but to us who are being saved it is the power of God.", adjacent_next: "For it is written: 'I will destroy the wisdom of the wise; the intelligence of the intelligent I will frustrate.'", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [16, 17, 19, 20] },
-  { verse_text: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", testament: "New", book: "1 Corinthians", chapter: 6, verse: 19, adjacent_prev: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", adjacent_next: "You are not your own; you were bought at a price. Therefore honor God with your bodies.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [17, 18, 20, 21] },
-  { verse_text: "You are not your own; you were bought at a price. Therefore honor God with your bodies.", testament: "New", book: "1 Corinthians", chapter: 6, verse: 20, adjacent_prev: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?", adjacent_next: "Follow my example, as I follow the example of Christ.", wrong_books: ["2 Corinthians", "Galatians", "Ephesians"], wrong_chapters: [5, 7, 8, 9], wrong_verses: [18, 19, 21, 22] },
-  { verse_text: "Every good and perfect gift is from above, coming down from the Father of the heavenly lights, who does not change like shifting shadows.", testament: "New", book: "James", chapter: 1, verse: 17, adjacent_prev: "Every good and perfect gift is from above, coming down from the Father of the heavenly lights, who does not change like shifting shadows.", adjacent_next: "He chose to give us birth through the word of truth, that we might be a kind of firstfruits of all he created.", wrong_books: ["1 Peter", "2 Peter", "1 John"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [15, 16, 18, 19] },
-  { verse_text: "Know therefore that the Lord your God is God; he is the faithful God, keeping his covenant of love to a thousand generations of those who love him and keep his commandments.", testament: "Old", book: "Deuteronomy", chapter: 7, verse: 9, adjacent_prev: "Know therefore that the Lord your God is God; he is the faithful God, keeping his covenant of love to a thousand generations of those who love him and keep his commandments.", adjacent_next: "But those who hate him he will repay to their face by destruction; he will not be slow to repay to their face those who hate him.", wrong_books: ["Exodus", "Leviticus", "Numbers"], wrong_chapters: [6, 8, 9, 10], wrong_verses: [7, 8, 10, 11] },
-  { verse_text: "The heavens declare the glory of God; the skies proclaim the work of his hands.", testament: "Old", book: "Psalms", chapter: 19, verse: 1, adjacent_prev: "The heavens declare the glory of God; the skies proclaim the work of his hands.", adjacent_next: "Day after day they pour forth speech; night after night they reveal knowledge.", wrong_books: ["Job", "Proverbs", "Ecclesiastes"], wrong_chapters: [18, 20, 21, 22], wrong_verses: [39, 40, 2, 3] },
-  { verse_text: "In the beginning was the Word, and the Word was with God, and the Word was God.", testament: "New", book: "John", chapter: 1, verse: 1, adjacent_prev: "In the beginning was the Word, and the Word was with God, and the Word was God.", adjacent_next: "He was with God in the beginning.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [39, 40, 2, 3] },
-  { verse_text: "He was with God in the beginning.", testament: "New", book: "John", chapter: 1, verse: 2, adjacent_prev: "In the beginning was the Word, and the Word was with God, and the Word was God.", adjacent_next: "Through him all things were made; without him nothing has been made that has been made.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [40, 41, 3, 4] },
-  { verse_text: "Through him all things were made; without him nothing has been made that has been made.", testament: "New", book: "John", chapter: 1, verse: 3, adjacent_prev: "He was with God in the beginning.", adjacent_next: "In him was life, and that life was the light of all mankind.", wrong_books: ["Matthew", "Mark", "Luke"], wrong_chapters: [2, 3, 4, 5], wrong_verses: [1, 2, 4, 5] }
+// ===================== BIBLE VERSE POOL =====================
+// A curated pool of well-known verses to draw from randomly.
+// Each entry has book/chapter/verse. We fetch the actual text from bible-api.com.
+// Adjacent verses (for Neighbor game) are also fetched dynamically.
+const VERSE_POOL = [
+  // Genesis
+  { book: "Genesis", chapter: 1, verse: 1, testament: "Old", wrongBooks: ["Exodus","Numbers","Deuteronomy"] },
+  // Psalms
+  { book: "Psalms", chapter: 23, verse: 1, testament: "Old", wrongBooks: ["Job","Proverbs","Isaiah"] },
+  { book: "Psalms", chapter: 19, verse: 1, testament: "Old", wrongBooks: ["Job","Proverbs","Ecclesiastes"] },
+  { book: "Psalms", chapter: 46, verse: 1, testament: "Old", wrongBooks: ["Job","Proverbs","Isaiah"] },
+  { book: "Psalms", chapter: 91, verse: 1, testament: "Old", wrongBooks: ["Job","Proverbs","Isaiah"] },
+  { book: "Psalms", chapter: 121, verse: 1, testament: "Old", wrongBooks: ["Job","Proverbs","Isaiah"] },
+  { book: "Psalms", chapter: 139, verse: 14, testament: "Old", wrongBooks: ["Job","Proverbs","Isaiah"] },
+  // Proverbs
+  { book: "Proverbs", chapter: 3, verse: 5, testament: "Old", wrongBooks: ["Job","Psalms","Ecclesiastes"] },
+  { book: "Proverbs", chapter: 3, verse: 6, testament: "Old", wrongBooks: ["Job","Psalms","Ecclesiastes"] },
+  { book: "Proverbs", chapter: 22, verse: 6, testament: "Old", wrongBooks: ["Job","Psalms","Ecclesiastes"] },
+  // Isaiah
+  { book: "Isaiah", chapter: 40, verse: 31, testament: "Old", wrongBooks: ["Jeremiah","Ezekiel","Psalms"] },
+  { book: "Isaiah", chapter: 41, verse: 10, testament: "Old", wrongBooks: ["Jeremiah","Ezekiel","Psalms"] },
+  { book: "Isaiah", chapter: 53, verse: 5, testament: "Old", wrongBooks: ["Jeremiah","Ezekiel","Psalms"] },
+  // Jeremiah
+  { book: "Jeremiah", chapter: 29, verse: 11, testament: "Old", wrongBooks: ["Isaiah","Ezekiel","Psalms"] },
+  // Deuteronomy
+  { book: "Deuteronomy", chapter: 7, verse: 9, testament: "Old", wrongBooks: ["Exodus","Leviticus","Numbers"] },
+  // Matthew
+  { book: "Matthew", chapter: 5, verse: 4, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 5, verse: 6, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 5, verse: 9, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 5, verse: 14, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 5, verse: 16, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 6, verse: 33, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 7, verse: 7, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 11, verse: 28, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 19, verse: 26, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  { book: "Matthew", chapter: 28, verse: 19, testament: "New", wrongBooks: ["Mark","Luke","John"] },
+  // John
+  { book: "John", chapter: 1, verse: 1, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 3, verse: 16, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 8, verse: 32, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 10, verse: 10, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 11, verse: 25, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 13, verse: 35, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 14, verse: 6, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 14, verse: 27, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  { book: "John", chapter: 15, verse: 13, testament: "New", wrongBooks: ["Matthew","Mark","Luke"] },
+  // Romans
+  { book: "Romans", chapter: 5, verse: 8, testament: "New", wrongBooks: ["1 Corinthians","Galatians","Ephesians"] },
+  { book: "Romans", chapter: 6, verse: 23, testament: "New", wrongBooks: ["1 Corinthians","Galatians","Ephesians"] },
+  { book: "Romans", chapter: 8, verse: 28, testament: "New", wrongBooks: ["1 Corinthians","Galatians","Ephesians"] },
+  { book: "Romans", chapter: 8, verse: 38, testament: "New", wrongBooks: ["1 Corinthians","Galatians","Ephesians"] },
+  { book: "Romans", chapter: 12, verse: 2, testament: "New", wrongBooks: ["1 Corinthians","Galatians","Ephesians"] },
+  // 1 Corinthians
+  { book: "1 Corinthians", chapter: 13, verse: 8, testament: "New", wrongBooks: ["2 Corinthians","Galatians","Ephesians"] },
+  { book: "1 Corinthians", chapter: 13, verse: 12, testament: "New", wrongBooks: ["2 Corinthians","Galatians","Ephesians"] },
+  // Galatians
+  { book: "Galatians", chapter: 2, verse: 20, testament: "New", wrongBooks: ["Romans","Ephesians","Philippians"] },
+  { book: "Galatians", chapter: 5, verse: 22, testament: "New", wrongBooks: ["Romans","Ephesians","Philippians"] },
+  // Ephesians
+  { book: "Ephesians", chapter: 2, verse: 8, testament: "New", wrongBooks: ["Galatians","Philippians","Colossians"] },
+  { book: "Ephesians", chapter: 3, verse: 20, testament: "New", wrongBooks: ["Galatians","Philippians","Colossians"] },
+  // Philippians
+  { book: "Philippians", chapter: 1, verse: 21, testament: "New", wrongBooks: ["Colossians","1 Thessalonians","Romans"] },
+  { book: "Philippians", chapter: 4, verse: 6, testament: "New", wrongBooks: ["Colossians","1 Thessalonians","Romans"] },
+  { book: "Philippians", chapter: 4, verse: 13, testament: "New", wrongBooks: ["Colossians","1 Thessalonians","Romans"] },
+  // Colossians
+  { book: "Colossians", chapter: 3, verse: 12, testament: "New", wrongBooks: ["Ephesians","Philippians","1 Thessalonians"] },
+  // 2 Timothy
+  { book: "2 Timothy", chapter: 1, verse: 7, testament: "New", wrongBooks: ["1 Timothy","Titus","Philemon"] },
+  { book: "2 Timothy", chapter: 3, verse: 16, testament: "New", wrongBooks: ["1 Timothy","Titus","Philemon"] },
+  // Hebrews
+  { book: "Hebrews", chapter: 11, verse: 1, testament: "New", wrongBooks: ["James","1 Peter","2 Peter"] },
+  { book: "Hebrews", chapter: 12, verse: 1, testament: "New", wrongBooks: ["James","1 Peter","2 Peter"] },
+  // James
+  { book: "James", chapter: 1, verse: 17, testament: "New", wrongBooks: ["1 Peter","2 Peter","1 John"] },
+  // 1 Peter
+  { book: "1 Peter", chapter: 5, verse: 10, testament: "New", wrongBooks: ["2 Peter","1 John","James"] },
+  // 1 John
+  { book: "1 John", chapter: 4, verse: 12, testament: "New", wrongBooks: ["2 John","3 John","James"] },
+  // Revelation
+  { book: "Revelation", chapter: 3, verse: 20, testament: "New", wrongBooks: ["Jude","1 John","Hebrews"] },
+  { book: "Revelation", chapter: 21, verse: 4, testament: "New", wrongBooks: ["Jude","1 John","Hebrews"] },
 ];
-const verseMap = {};
 
-BIBLE_DATABASE.forEach(v => {
-  const key = `${v.book}|${v.chapter}|${v.verse}`;
-  verseMap[key] = v;
-});
-function getVerseText(book, chapter, verse) {
-  const key = `${book}|${chapter}|${verse}`;
-  return verseMap[key]?.verse_text || null;
+const OT_BOOKS = ['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth',
+  '1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther',
+  'Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations',
+  'Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk',
+  'Zephaniah','Haggai','Zechariah','Malachi'];
+
+const NT_BOOKS = ['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians',
+  'Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians',
+  '1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter',
+  '1 John','2 John','3 John','Jude','Revelation'];
+
+// ===================== BIBLE API =====================
+// bible-api.com supports: KJV, WEB, ASV, BBE, DARBY, YLT, WEBSTER, RWV, OEBCW, OEBUS
+const TRANSLATION = 'web';
+
+async function fetchVerse(book, chapter, verse) {
+  const ref = encodeURIComponent(`${book} ${chapter}:${verse}`);
+  const url = `https://bible-api.com/${ref}?translation=${TRANSLATION}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  // verse_text comes with a trailing newline sometimes
+  return data.text.replace(/\n+/g, ' ').trim();
 }
+
+async function fetchPassage(book, chapter, verseStart, verseEnd) {
+  const ref = encodeURIComponent(`${book} ${chapter}:${verseStart}-${verseEnd}`);
+  const url = `https://bible-api.com/${ref}?translation=${TRANSLATION}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  // Returns array of verses
+  if (data.verses && Array.isArray(data.verses)) {
+    return data.verses.map(v => ({
+      verse: v.verse,
+      text: v.text.replace(/\n+/g, ' ').trim()
+    }));
+  }
+  return [{ verse: verseStart, text: data.text.replace(/\n+/g, ' ').trim() }];
+}
+
+// Fetch a wrong verse text (for distractors)
+async function fetchWrongVerse(book, chapter, verse) {
+  try {
+    return await fetchVerse(book, chapter, verse);
+  } catch {
+    return null;
+  }
+}
+
 // ===================== STATE =====================
 const state = {
   screen: 'home',
   selectedGame: null,
   selectedDiff: null,
-  loading: false,
   xp: 0,
   gamesPlayed: 0,
   correctAnswers: 0,
@@ -446,19 +490,8 @@ const state = {
   g2HintsUsed: 0,
   g2Answered: false,
   g2MediumOptions: [],
+  _easySetup: null,
 };
-
-// ===================== BIBLE DATA =====================
-const OT_BOOKS = ['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth',
-  '1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther',
-  'Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations',
-  'Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk',
-  'Zephaniah','Haggai','Zechariah','Malachi'];
-
-const NT_BOOKS = ['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians',
-  'Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians',
-  '1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter',
-  '1 John','2 John','3 John','Jude','Revelation'];
 
 // ===================== LEVELS =====================
 const LEVELS = [
@@ -469,7 +502,6 @@ const LEVELS = [
   { name: 'Sage', icon: '🕊️', xp: 800 },
   { name: 'Prophet', icon: '⚡', xp: 1200 },
   { name: 'Apostle', icon: '🤲', xp: 1800 },
-  { name: 'Believer', icon: '🪦', xp: 2200 },
   { name: 'Disciple', icon: '👣', xp: 2650 },
   { name: 'Servant', icon: '🤝', xp: 3150 },
   { name: 'Friend', icon: '❤️', xp: 3700 },
@@ -478,93 +510,25 @@ const LEVELS = [
   { name: 'Overcomer', icon: '🛡️', xp: 5650 },
   { name: 'Rooted One', icon: '🌱', xp: 6400 },
   { name: 'Fruitbearer', icon: '🍇', xp: 7200 },
-  { name: 'Steadfast', icon: '🪨', xp: 8050 },
   { name: 'Prayer Warrior', icon: '🕯️', xp: 8950 },
   { name: 'Peacemaker', icon: '🕊️', xp: 9900 },
   { name: 'Lightbearer', icon: '💡', xp: 10900 },
-  { name: 'Salt of the Earth', icon: '🧂', xp: 11950 },
-  { name: 'Watchman', icon: '🔭', xp: 13050 },
   { name: 'Shepherd', icon: '🐑', xp: 14200 },
-  { name: 'Steward', icon: '💼', xp: 15400 },
-  { name: 'Builder', icon: '🔨', xp: 16650 },
   { name: 'Teacher', icon: '🏫', xp: 17950 },
-  { name: 'Mentor', icon: '🕯️', xp: 19300 },
-  { name: 'Restorer', icon: '🩹', xp: 20700 },
-  { name: 'Consoler', icon: '🫂', xp: 22150 },
-  { name: 'Confessor', icon: '🗣️', xp: 23650 },
-  { name: 'Witness', icon: '📢', xp: 25200 },
   { name: 'Evangelist', icon: '🌍', xp: 26800 },
-  { name: 'Missionary', icon: '✈️', xp: 28450 },
   { name: 'Pilgrim', icon: '🥾', xp: 30150 },
-  { name: 'Follower of the Way', icon: '🛤️', xp: 31900 },
-  { name: 'Doer of the Word', icon: '✅', xp: 33700 },
-  { name: 'Guardian of Truth', icon: '🔐', xp: 35550 },
-  { name: 'Spirit-Filled', icon: '🌀', xp: 37450 },
-  { name: 'Led by the Spirit', icon: '🧭', xp: 39400 },
   { name: 'Abiding One', icon: '🌳', xp: 41400 },
   { name: 'Intercessor', icon: '🤲', xp: 43450 },
-  { name: 'Sacrificial', icon: '🫱', xp: 45550 },
-  { name: 'Crucified to the World', icon: '✝️', xp: 47700 },
-  { name: 'Dead to Self', icon: '⚰️', xp: 50000 },
-  { name: 'Resurrected in Christ', icon: '🌅', xp: 52350 },
-  { name: 'Seated in Heaven', icon: '🪑', xp: 54750 },
   { name: 'Ambassador', icon: '🌍', xp: 57200 },
-  { name: 'Fellow Worker', icon: '🛠️', xp: 59700 },
-  { name: 'Fellowship Keeper', icon: '🤝', xp: 62250 },
-  { name: 'Unity Builder', icon: '🧩', xp: 64850 },
-  { name: 'Householder', icon: '🏠', xp: 67500 },
-  { name: 'Father in Faith', icon: '🧔', xp: 70200 },
-  { name: 'Mother in Zion', icon: '👩', xp: 72950 },
-  { name: 'Patriarch', icon: '🏛️', xp: 75750 },
-  { name: 'Matriarch', icon: '🪞', xp: 78600 },
   { name: 'Elder', icon: '👴', xp: 81500 },
-  { name: 'Overcomer of Babylon', icon: '🏙️', xp: 84450 },
-  { name: 'Conqueror', icon: '🏆', xp: 87450 },
   { name: 'More Than Conqueror', icon: '💪', xp: 90500 },
-  { name: 'Living Stone', icon: '🪨', xp: 93600 },
   { name: 'Temple of God', icon: '🕌', xp: 96750 },
-  { name: 'City on a Hill', icon: '🏙️', xp: 100000 },
-  { name: 'Star of the Morning', icon: '⭐', xp: 103300 },
   { name: 'Bride of Christ', icon: '👰', xp: 106650 },
-  { name: 'Fellow Heir', icon: '👑', xp: 110050 },
-  { name: 'Co-Regent', icon: '🪑', xp: 113500 },
-  { name: 'Son of God', icon: '✨', xp: 117000 },
-  { name: 'Image of Christ', icon: '🫱🫰', xp: 120550 },
-  { name: 'Perfect in Love', icon: '💖', xp: 124150 },
-  { name: 'Fullness of Christ', icon: '🌌', xp: 127800 },
-  { name: 'One with the Father', icon: '🤲', xp: 131500 },
   { name: 'Glorified', icon: '✨', xp: 135250 },
-  { name: 'Eternal Witness', icon: '📜', xp: 139050 },
-  { name: 'Throne-Sharer', icon: '🪑', xp: 142900 },
   { name: 'New Creation', icon: '🦋', xp: 146800 },
-  { name: 'Firstfruits', icon: '🌾', xp: 150750 },
-  { name: 'Lampstand', icon: '🕯️', xp: 154750 },
-  { name: 'Tree of Life', icon: '🌳', xp: 158800 },
   { name: 'Living Water', icon: '💧', xp: 162900 },
   { name: 'Light of the World', icon: '🔆', xp: 167050 },
-  { name: 'Harvester', icon: '🪓', xp: 171250 },
-  { name: 'Reaper of Souls', icon: '🪝', xp: 175500 },
-  { name: 'Kingdom Builder', icon: '🏰', xp: 179800 },
-  { name: 'Gatekeeper of Zion', icon: '🚪', xp: 184150 },
-  { name: 'Sealed by the Spirit', icon: '🔒', xp: 188550 },
-  { name: 'Crown-Bearer', icon: '👑', xp: 193000 },
-  { name: 'Victor in Tribulation', icon: '🔥', xp: 197500 },
-  { name: 'Faithful unto Death', icon: '✝️', xp: 202050 },
-  { name: 'Resurrection Heir', icon: '🌅', xp: 206650 },
-  { name: 'Citizen of Heaven', icon: '🪐', xp: 211300 },
-  { name: 'Saint Eternal', icon: '🕯️', xp: 216000 },
-  { name: 'Chosen Vessel', icon: '🏺', xp: 220750 },
-  { name: 'Voice of the Cloud of Witnesses', icon: '☁️', xp: 225550 },
-  { name: 'Eternal Worshipper', icon: '🎵', xp: 230400 },
-  { name: 'Throne-Attendant', icon: '🪑', xp: 235300 },
-  { name: 'Lamb-Follower', icon: '🐑', xp: 240250 },
-  { name: 'New Jerusalem Dweller', icon: '🏙️', xp: 245250 },
   { name: 'Face-to-Face', icon: '👁️', xp: 250300 }
-];
-
-const LOADING_MSGS = [
-  'Searching the scrolls…','Turning to a new page…','Opening the scriptures…',
-  'Seeking wisdom…','Unrolling the parchment…','By lamplight…'
 ];
 
 function getLevel(xp) {
@@ -587,7 +551,7 @@ function addXP(amount) {
   if (newLevel.index > oldLevel.index) {
     setTimeout(() => showLevelUp(newLevel), 600);
   }
-  showXPFloat(amount);
+  if (amount > 0) showXPFloat(amount);
 }
 
 function showXPFloat(amount) {
@@ -681,70 +645,43 @@ function playAgain() {
   startGame();
 }
 
-// ===================== DATABASE FUNCTIONS =====================
-function getRandomVerse() {
-  return BIBLE_DATABASE[Math.floor(Math.random() * BIBLE_DATABASE.length)];
+// ===================== LOADING UI =====================
+const LOADING_MSGS = [
+  'Unrolling the parchment…',
+  'Searching the scrolls…',
+  'Turning to a new page…',
+  'Seeking wisdom…',
+  'Opening the scriptures…',
+  'By lamplight…',
+];
+
+function showLoading(msg) {
+  const gc = document.getElementById('game-content');
+  const sub = LOADING_MSGS[Math.floor(Math.random() * LOADING_MSGS.length)];
+  gc.innerHTML = `
+    <div class="loading-wrap">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">${escHtml(msg || 'Loading verse…')}</div>
+      <div class="loading-sub">${escHtml(sub)}</div>
+    </div>`;
 }
 
-function getVersesByTestament(testament) {
-  return BIBLE_DATABASE.filter(v => v.testament === testament);
-}
-
-function generateDetectiveData(verse) {
-  // This verse already has wrong options in the database
-  return {
-    verse_text: verse.verse_text,
-    testament: verse.testament,
-    book: verse.book,
-    chapter: verse.chapter,
-    verse: verse.verse,
-    wrong_books: verse.wrong_books,
-    wrong_chapters: verse.wrong_chapters,
-    wrong_verses: verse.wrong_verses
-  };
-}
-
-function generateNeighborData(verse, difficulty) {
-  const data = {
-    verse_text: verse.verse_text,
-    book: verse.book,
-    chapter: verse.chapter,
-    verse: verse.verse,
-    direction: 'next',
-    hint_context: `From ${verse.book} - look for context about the passage.`
-  };
-
-  if (difficulty === 'veryhard') {
-    data.adjacent_text = verse.adjacent_next;
-    data.adjacent_verse = verse.verse + 1;
-
-  } else if (difficulty === 'medium') {
-    data.correct_answer = verse.adjacent_next;
-
-    // ✅ REAL verses now
-    data.wrong_options = getWrongVerseTexts(verse, 3);
-
-  } else {
-    // Easy
-    data.real_after = verse.adjacent_next;
-
-    // ✅ Real fake verse
-    data.fake_verse = getWrongVerseTexts(verse, 1)[0];
-    
-    // Try to get previous verse from the database; fallback to adjacent_next if missing
-const prevVerse = getVerseText(verse.book, verse.chapter, verse.verse - 1);
-data.real_before = prevVerse || verse.adjacent_prev || verse.adjacent_next;
-
-data.real_after = verse.adjacent_next;
-
-    data.fake_position = Math.random() > 0.5 ? 'before' : 'after';
-  }
-
-  return data;
+function showApiError(err, retryFn) {
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="error-card">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Couldn't Load Verse</h3>
+      <p>Unable to reach bible-api.com. Please check your connection and try again.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">${escHtml(String(err))}</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-secondary btn-sm" onclick="goHome()">Back</button>
+        <button class="btn btn-primary btn-sm" onclick="(${retryFn.toString()})()">Retry</button>
+      </div>
+    </div>`;
 }
 
 // ===================== START GAME =====================
-function startGame() {
+async function startGame() {
   showScreen('game');
   state.roundXP = 0;
   state.roundBreakdown = [];
@@ -752,17 +689,39 @@ function startGame() {
   state.g2HintsUsed = 0;
   state.g2Answered = false;
 
+  // Pick a random verse from the pool
+  const poolEntry = VERSE_POOL[Math.floor(Math.random() * VERSE_POOL.length)];
+
   if (state.selectedGame === 'detective') {
     document.getElementById('game-title').textContent = 'Verse Detective';
     document.getElementById('game-score-mini').textContent = '';
     state.g1Step = 0;
     state.g1Attempt = 0;
+
+    showLoading('Fetching verse…');
     renderG1Steps();
-    
-    const randomVerse = getRandomVerse();
-    const data = generateDetectiveData(randomVerse);
-    state.currentData = data;
-    initDetectiveRound(data);
+
+    try {
+      const verseText = await fetchVerse(poolEntry.book, poolEntry.chapter, poolEntry.verse);
+      // Build wrong options for book/chapter/verse
+      const wrongChapters = generateWrongNumbers(poolEntry.chapter, 4, 1, 50);
+      const wrongVerses = generateWrongNumbers(poolEntry.verse, 4, 1, 40);
+
+      state.currentData = {
+        verse_text: verseText,
+        testament: poolEntry.testament,
+        book: poolEntry.book,
+        chapter: poolEntry.chapter,
+        verse: poolEntry.verse,
+        wrong_books: poolEntry.wrongBooks,
+        wrong_chapters: wrongChapters,
+        wrong_verses: wrongVerses,
+      };
+      renderDetectiveStep();
+    } catch (err) {
+      showApiError(err, startGame);
+    }
+
   } else if (state.selectedGame === 'neighbor') {
     const diff = state.selectedDiff;
     const diffLabels = { easy: 'Easy', medium: 'Medium', veryhard: 'Very Hard' };
@@ -770,18 +729,121 @@ function startGame() {
     document.getElementById('game-score-mini').textContent = '';
     document.getElementById('step-indicator').innerHTML = '';
 
-    const randomVerse = getRandomVerse();
-    const data = generateNeighborData(randomVerse, diff);
-    state.currentData = data;
+    showLoading('Fetching passage…');
 
-    if (diff === 'veryhard') {
-      initNeighborVHard(data);
-    } else if (diff === 'medium') {
-      initNeighborMedium(data);
-    } else {
-      initNeighborEasy(data);
+    try {
+      // Fetch main verse + adjacent verses (prev and next)
+      const verseNum = poolEntry.verse;
+      const chap = poolEntry.chapter;
+      const book = poolEntry.book;
+
+      // Fetch a range: prev, current, next
+      const startV = Math.max(1, verseNum - 1);
+      const endV = verseNum + 1;
+      let passages;
+      try {
+        passages = await fetchPassage(book, chap, startV, endV);
+      } catch {
+        // fallback: just fetch current
+        const txt = await fetchVerse(book, chap, verseNum);
+        passages = [{ verse: verseNum, text: txt }];
+      }
+
+      const mainEntry = passages.find(p => p.verse === verseNum);
+      const prevEntry = passages.find(p => p.verse === verseNum - 1);
+      const nextEntry = passages.find(p => p.verse === verseNum + 1);
+
+      const verseText = mainEntry ? mainEntry.text : (await fetchVerse(book, chap, verseNum));
+      const adjacentNext = nextEntry ? nextEntry.text : null;
+      const adjacentPrev = prevEntry ? prevEntry.text : null;
+
+      // Build wrong verse texts for distractors
+      let wrongTexts = [];
+      if (diff === 'medium' || diff === 'easy') {
+        wrongTexts = await fetchMultipleWrongVerses(poolEntry, 3);
+      }
+
+      state.currentData = {
+        verse_text: verseText,
+        book,
+        chapter: chap,
+        verse: verseNum,
+        testament: poolEntry.testament,
+        adjacent_next: adjacentNext,
+        adjacent_prev: adjacentPrev,
+        adjacent_verse: verseNum + 1,
+        direction: 'next',
+        hint_context: `From ${book} — look for context about this passage.`,
+        wrong_options: wrongTexts,
+        correct_answer: adjacentNext,
+      };
+
+      if (!adjacentNext && diff !== 'detective') {
+        // If we couldn't get adjacent verse, fallback gracefully
+        state.currentData.adjacent_next = '(Could not load adjacent verse)';
+        state.currentData.correct_answer = '(Could not load adjacent verse)';
+      }
+
+      if (diff === 'veryhard') {
+        initNeighborVHard(state.currentData);
+      } else if (diff === 'medium') {
+        initNeighborMedium(state.currentData);
+      } else {
+        initNeighborEasy(state.currentData);
+      }
+    } catch (err) {
+      showApiError(err, startGame);
     }
   }
+}
+
+// ===================== FETCH WRONG VERSE DISTRACTORS =====================
+async function fetchMultipleWrongVerses(poolEntry, count) {
+  // Pick random entries from pool that differ from this one
+  const otherEntries = VERSE_POOL.filter(e =>
+    !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse)
+  );
+  shuffleArray(otherEntries);
+  const picks = otherEntries.slice(0, count + 2); // fetch a few extra in case some fail
+
+  const results = [];
+  for (const pick of picks) {
+    if (results.length >= count) break;
+    try {
+      // Fetch the adjacent (next) verse for each distractor
+      const nextVerse = pick.verse + 1;
+      const txt = await fetchVerse(pick.book, pick.chapter, nextVerse);
+      if (txt && txt.length > 10) results.push(txt);
+    } catch {
+      // skip failed fetches
+    }
+  }
+
+  // If not enough, fill with plausible-sounding wrong verses from different books
+  if (results.length < count) {
+    const fallbackEntries = otherEntries.slice(count + 2);
+    for (const pick of fallbackEntries) {
+      if (results.length >= count) break;
+      try {
+        const txt = await fetchVerse(pick.book, pick.chapter, pick.verse);
+        if (txt && txt.length > 10) results.push(txt);
+      } catch {}
+    }
+  }
+
+  return results.slice(0, count);
+}
+
+// ===================== NUMBER GENERATION =====================
+function generateWrongNumbers(correct, count, min, max) {
+  const nums = new Set();
+  let attempts = 0;
+  while (nums.size < count && attempts < 100) {
+    attempts++;
+    const n = Math.floor(Math.random() * (max - min + 1)) + min;
+    if (n !== correct) nums.add(n);
+  }
+  return [...nums];
 }
 
 // ===================== GAME 1: VERSE DETECTIVE =====================
@@ -868,7 +930,7 @@ function renderBookStep() {
       <div class="verse-card"><div class="verse-text">${escHtml(data.verse_text)}</div>
         <div class="verse-ref">${testament} Testament</div></div>
       <div class="question-label">Which Book?</div>
-      <div class="question-sub">Type to search from ${testament} Testament books</div>
+      <div class="question-sub">Type to search ${testament} Testament books</div>
       <div class="input-wrap">
         <input type="text" class="input-field" id="book-input" placeholder="Start typing a book name…"
           autocomplete="off" oninput="filterBooks()" onfocus="filterBooks()">
@@ -926,7 +988,7 @@ function submitBook() {
     state.g1Attempt = 1;
     state.totalAnswers++;
     showFeedback(false);
-    state.g1Options = buildOptions(correct, state.currentData.wrong_books, 5);
+    state.g2MediumOptions = buildOptions(correct, state.currentData.wrong_books, 5);
     setTimeout(() => renderBookChoices(), 800);
   }
 }
@@ -969,9 +1031,7 @@ function guessBookOption(idx) {
     showFeedback(false);
     opt.eliminated = true;
     const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
-    if (wrongOpts.length > 0) {
-      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
-    }
+    if (wrongOpts.length > 0) wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     state.g1Attempt++;
     setTimeout(() => renderBookChoices(), 800);
   }
@@ -1007,7 +1067,7 @@ function submitNumber(type) {
   const stepIdx = type === 'chapter' ? 2 : 3;
 
   if (guess === correct) {
-    const xp = type === 'chapter' ? 40 : 40;
+    const xp = 40;
     state.roundResults[stepIdx] = { firstTry: true, correct: true };
     state.roundBreakdown.push({ label: `${type === 'chapter' ? 'Chapter' : 'Verse'} (1st try)`, xp });
     state.roundXP += xp;
@@ -1020,7 +1080,7 @@ function submitNumber(type) {
     state.totalAnswers++;
     showFeedback(false);
     const wrongNums = type === 'chapter' ? state.currentData.wrong_chapters : state.currentData.wrong_verses;
-    state.g1Options = buildOptions(correct, wrongNums.map(String), 5);
+    state.g2MediumOptions = buildOptions(correct, wrongNums.map(String), 5);
     setTimeout(() => renderNumberChoices(type), 800);
   }
 }
@@ -1028,7 +1088,6 @@ function submitNumber(type) {
 function renderNumberChoices(type) {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
-  const correct = type === 'chapter' ? data.chapter : data.verse;
   const refParts = [data.testament + ' Testament', data.book];
   if (type === 'verse') refParts.push('Chapter ' + data.chapter);
   const opts = state.g2MediumOptions;
@@ -1068,9 +1127,7 @@ function guessNumOption(idx, type) {
     showFeedback(false);
     opt.eliminated = true;
     const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
-    if (wrongOpts.length > 0) {
-      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
-    }
+    if (wrongOpts.length > 0) wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     state.g1Attempt++;
     setTimeout(() => renderNumberChoices(type), 800);
   }
@@ -1100,18 +1157,29 @@ function finishDetective() {
 }
 
 // ===================== GAME 2: VERSE NEIGHBOR =====================
-
 function initNeighborVHard(data) {
   state.g2HintsUsed = 0;
   state.g2Answered = false;
   const gc = document.getElementById('game-content');
-  const dirLabel = data.direction === 'next' ? 'next' : 'previous';
+
+  if (!data.adjacent_next || data.adjacent_next.startsWith('(Could not')) {
+    gc.innerHTML = `<div class="error-card">
+      <h3>Adjacent verse unavailable</h3>
+      <p>Could not load the next verse for this passage. Try a different verse.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-secondary btn-sm" onclick="goHome()">Back</button>
+        <button class="btn btn-primary btn-sm" onclick="startGame()">Try Again</button>
+      </div>
+    </div>`;
+    return;
+  }
+
   gc.innerHTML = `
     <div class="verse-card">
       <div class="verse-text">${escHtml(data.verse_text)}</div>
       <div id="vhard-hints-display"></div>
     </div>
-    <div class="question-label">Type the ${dirLabel} verse from memory</div>
+    <div class="question-label">Type the next verse from memory</div>
     <div class="hints-row">
       <button class="hint-btn" id="hint1-btn" onclick="useVHardHint(1)"><i class="fa-solid fa-lightbulb"></i> Hint 1: Verse #</button>
       <button class="hint-btn" id="hint2-btn" onclick="useVHardHint(2)" disabled><i class="fa-solid fa-lightbulb"></i> Hint 2: Chapter</button>
@@ -1151,7 +1219,7 @@ function submitVHard() {
   if (!userText) return;
   state.g2Answered = true;
   const data = state.currentData;
-  const correct = data.adjacent_text;
+  const correct = data.adjacent_next;
   const result = compareTexts(userText, correct);
 
   if (result.accuracy < 0.2) {
@@ -1169,7 +1237,7 @@ function showTooHardModal(result, correct) {
       <h3>That was a tough one!</h3>
       <p>Your answer was ${Math.round(result.accuracy * 100)}% accurate. Would you like to see the full results or try an easier difficulty?</p>
       <div class="modal-actions">
-        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="this.closest('.modal-overlay').remove();showVHardResults(window._vhResult, window._vhCorrect)">See Results</button>
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="this.closest('.modal-overlay').remove();showVHardResults(window._vhResult,window._vhCorrect)">See Results</button>
         <button class="btn btn-primary btn-sm" style="flex:1" onclick="this.closest('.modal-overlay').remove();state.selectedDiff='medium';startGame()">Try Easier</button>
       </div>
     </div>`;
@@ -1228,8 +1296,28 @@ function showVHardResults(result, correct) {
 function initNeighborMedium(data) {
   state.g2HintsUsed = 0;
   state.g2Answered = false;
-  const options = shuffleArray([data.correct_answer, ...data.wrong_options]);
-   state.g2MediumOptions = options.map(o => ({
+
+  if (!data.correct_answer || data.correct_answer.startsWith('(Could not')) {
+    document.getElementById('game-content').innerHTML = `<div class="error-card">
+      <h3>Adjacent verse unavailable</h3>
+      <p>Could not load the next verse for this passage. Try a different one.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-secondary btn-sm" onclick="goHome()">Back</button>
+        <button class="btn btn-primary btn-sm" onclick="startGame()">Try Again</button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  // Build options: correct + up to 3 wrong. Pad with generic fallbacks if needed.
+  let wrongOpts = (data.wrong_options || []).filter(t => t && t !== data.correct_answer);
+  while (wrongOpts.length < 3) {
+    wrongOpts.push(`(Option ${wrongOpts.length + 2} unavailable)`);
+  }
+  wrongOpts = wrongOpts.slice(0, 3);
+
+  const options = shuffleArray([data.correct_answer, ...wrongOpts]);
+  state.g2MediumOptions = options.map(o => ({
     value: o,
     eliminated: false,
     isCorrect: o === data.correct_answer
@@ -1247,11 +1335,11 @@ function renderMediumQuestion() {
       <div class="verse-text">${escHtml(data.verse_text)}</div>
       <div id="med-hint-display"></div>
     </div>
-    <div class="question-label">Which verse is adjacent?</div>
-    <div class="question-sub">One of these comes right ${data.direction === 'next' ? 'after' : 'before'} the verse above</div>
+    <div class="question-label">Which verse comes next?</div>
+    <div class="question-sub">One of these follows immediately after in ${escHtml(data.book)}</div>
     <div class="hints-row">
       <button class="hint-btn" id="med-hint-btn" onclick="useMedHint()" ${state.g2HintsUsed > 0 ? 'disabled class="hint-btn used"' : ''}>
-        <i class="fa-solid fa-lightbulb"></i> Hint: Direction</button>
+        <i class="fa-solid fa-lightbulb"></i> Hint</button>
     </div>
     <div class="options-grid" id="med-options">
       ${opts.map((o, i) => o.eliminated ?
@@ -1260,7 +1348,7 @@ function renderMediumQuestion() {
       ).join('')}
     </div>`;
   if (state.g2HintsUsed > 0) {
-    document.getElementById('med-hint-display').innerHTML = `<div class="hint-reveal">The answer is the ${data.direction} verse</div>`;
+    document.getElementById('med-hint-display').innerHTML = `<div class="hint-reveal">Look for thematic continuity in ${escHtml(data.book)}</div>`;
   }
 }
 
@@ -1269,7 +1357,7 @@ function useMedHint() {
   document.getElementById('med-hint-btn').classList.add('used');
   document.getElementById('med-hint-btn').disabled = true;
   document.getElementById('med-hint-display').innerHTML =
-    `<div class="hint-reveal">The answer is the ${state.currentData.direction} verse</div>`;
+    `<div class="hint-reveal">Look for thematic continuity in ${escHtml(state.currentData.book)}</div>`;
 }
 
 function guessMedOption(idx) {
@@ -1297,9 +1385,7 @@ function guessMedOption(idx) {
     showFeedback(false);
     opt.eliminated = true;
     const wrongOpts = state.g2MediumOptions.filter((o, oi) => oi !== idx && !o.eliminated && !o.isCorrect);
-    if (wrongOpts.length > 0) {
-      wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
-    }
+    if (wrongOpts.length > 0) wrongOpts[Math.floor(Math.random() * wrongOpts.length)].eliminated = true;
     setTimeout(() => renderMediumQuestion(), 800);
   }
 }
@@ -1307,16 +1393,43 @@ function guessMedOption(idx) {
 function initNeighborEasy(data) {
   state.g2HintsUsed = 0;
   state.g2Answered = false;
-  let beforeText, afterText, realDir;
-  if (data.fake_position === 'before') {
-    beforeText = data.fake_verse;
-    afterText = data.real_after;
+
+  const hasNext = data.adjacent_next && !data.adjacent_next.startsWith('(Could not');
+  const hasPrev = data.adjacent_prev && !data.adjacent_prev.startsWith('(Could not');
+
+  // Use whichever adjacent verses are available
+  let realVerse, realDir, fakeVerse;
+  if (hasNext) {
+    realVerse = data.adjacent_next;
     realDir = 'after';
-  } else {
-    beforeText = data.real_before;
-    afterText = data.fake_verse;
+  } else if (hasPrev) {
+    realVerse = data.adjacent_prev;
     realDir = 'before';
+  } else {
+    document.getElementById('game-content').innerHTML = `<div class="error-card">
+      <h3>Adjacent verses unavailable</h3>
+      <p>Could not load neighboring verses for this passage. Try again with a different verse.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn-secondary btn-sm" onclick="goHome()">Back</button>
+        <button class="btn btn-primary btn-sm" onclick="startGame()">Try Again</button>
+      </div>
+    </div>`;
+    return;
   }
+
+  // Fake verse: use a verse from wrong options, or the prev if we're showing next
+  const wrongs = data.wrong_options || [];
+  fakeVerse = wrongs.length > 0 ? wrongs[0] : 'And they went on their way, giving thanks to the Lord.';
+
+  let beforeText, afterText;
+  if (realDir === 'after') {
+    beforeText = fakeVerse;
+    afterText = realVerse;
+  } else {
+    beforeText = realVerse;
+    afterText = fakeVerse;
+  }
+
   state._easySetup = { beforeText, afterText, realDir };
   renderEasyQuestion();
 }
@@ -1368,9 +1481,7 @@ function guessEasy(dir) {
   const isCorrect = dir === s.realDir;
 
   document.getElementById('eopt-' + dir).classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) {
-    document.getElementById('eopt-' + s.realDir).classList.add('correct');
-  }
+  if (!isCorrect) document.getElementById('eopt-' + s.realDir).classList.add('correct');
 
   const xp = isCorrect ? (state.g2HintsUsed === 0 ? 30 : 20) : 0;
   state.roundXP = xp;
@@ -1418,7 +1529,7 @@ function showResults(gameType, data) {
     document.getElementById('results-title').textContent = isCorrectRound ? 'Well Done!' : 'Keep Learning!';
     document.getElementById('results-sub').textContent = `${data.book} ${data.chapter}:${data.verse}`;
     bd.innerHTML = `<div class="verse-card" style="margin:0"><div class="verse-text" style="font-size:15px">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse}</div></div>`;
+      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse} (WEB)</div></div>`;
   }
 
   xpDiv.innerHTML = `<div class="xp-breakdown">
@@ -1427,7 +1538,7 @@ function showResults(gameType, data) {
   </div>`;
 }
 
-// ===================== TEXT COMPARISON (LCS) =====================
+// ===================== TEXT COMPARISON =====================
 function compareTexts(userText, correctText) {
   const normalize = t => t.toLowerCase().replace(/[^\w\s']/g, '').replace(/\s+/g, ' ').trim();
   const userWords = normalize(userText).split(' ').filter(Boolean);
@@ -1450,15 +1561,9 @@ function compareTexts(userText, correctText) {
   const matchedCorrect = new Set();
   let i = m, j = n;
   while (i > 0 && j > 0) {
-    if (userWords[i - 1] === correctWords[j - 1]) {
-      matchedUser.add(i - 1);
-      matchedCorrect.add(j - 1);
-      i--; j--;
-    } else if (dp[i - 1][j] > dp[i][j - 1]) {
-      i--;
-    } else {
-      j--;
-    }
+    if (userWords[i - 1] === correctWords[j - 1]) { matchedUser.add(i - 1); matchedCorrect.add(j - 1); i--; j--; }
+    else if (dp[i - 1][j] > dp[i][j - 1]) i--;
+    else j--;
   }
 
   const accuracy = dp[m][n] / Math.max(m, n);
@@ -1482,9 +1587,11 @@ function compareTexts(userText, correctText) {
 
 // ===================== HELPERS =====================
 function buildOptions(correct, wrongValues, count) {
-  const wrongArr = wrongValues.slice(0, count - 1);
-  const all = [{ value: correct, eliminated: false, isCorrect: true },
-    ...wrongArr.map(v => ({ value: v, eliminated: false, isCorrect: false }))];
+  const wrongArr = (wrongValues || []).slice(0, count - 1);
+  const all = [
+    { value: correct, eliminated: false, isCorrect: true },
+    ...wrongArr.map(v => ({ value: v, eliminated: false, isCorrect: false }))
+  ];
   return shuffleArray(all);
 }
 
@@ -1496,50 +1603,16 @@ function shuffleArray(arr) {
   }
   return a;
 }
-function getWrongVerseTexts(verse, count) {
-  const candidates = [];
-
-  // Use the “wrong_*” lists from the verse object if available
-  const wrongBooks = verse.wrong_books || [];
-  const wrongChapters = (verse.wrong_chapters || []).map(String);
-  const wrongVerses = (verse.wrong_verses || []).map(String);
-
-  // Generate candidate keys by mixing wrong book/chapter/verse
-  // (This is approximate; your dataset is handcrafted so this usually works.)
-  for (const b of (wrongBooks.length ? wrongBooks : [verse.book])) {
-    const chaptersToTry = wrongChapters.length ? wrongChapters : [String(verse.chapter)];
-    const versesToTry = wrongVerses.length ? wrongVerses : [String(verse.verse)];
-
-    for (const c of chaptersToTry) {
-      for (const v of versesToTry) {
-        const text = getVerseText(b, parseInt(c, 10), parseInt(v, 10));
-        if (text && text !== verse.verse_text) {
-          candidates.push(text);
-        }
-      }
-    }
-  }
-
-  // Fallback: scan random verses if we still have too few
-  if (candidates.length < count) {
-    const pool = BIBLE_DATABASE.map(x => x.verse_text).filter(t => t !== verse.verse_text);
-    while (candidates.length < count && pool.length) {
-      candidates.push(pool[Math.floor(Math.random() * pool.length)]);
-    }
-  }
-
-  return shuffleArray([...new Set(candidates)]).slice(0, count);
-}
 
 function escHtml(text) {
-  if (!text) return '';
+  if (text == null) return '';
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = String(text);
   return div.innerHTML;
 }
 
 function escAttr(text) {
-  return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  return String(text).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
 function showFeedback(isCorrect) {
@@ -1554,112 +1627,49 @@ function showFeedback(isCorrect) {
 
 document.addEventListener('click', function(e) {
   const dd = document.getElementById('book-dropdown');
-  if (dd && !e.target.closest('.input-wrap')) {
-    dd.classList.remove('open');
-  }
+  if (dd && !e.target.closest('.input-wrap')) dd.classList.remove('open');
 });
 
-function init() {
-  loadFromStorage(); // ✅ restore stats immediately
-  updateStats();
-}
+// ===================== PERSIST =====================
+const SAVE_KEY = 'sq_save_v2';
 
-init();
-// Save before the page is destroyed / closed / refreshed
-window.addEventListener('beforeunload', () => {
-  saveToStorage();
-});
-
-// Better coverage for mobile browsers
-window.addEventListener('pagehide', () => {
-  saveToStorage();
-});
-
-// Also save when the tab becomes hidden
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveToStorage();
-});
-const SAVE_KEY = 'sq_save_v1';
-
-function serializeSave() {
-  return {
-    version: 1,
-    stats: {
+function saveToStorage() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      version: 2,
       xp: state.xp,
       gamesPlayed: state.gamesPlayed,
       correctAnswers: state.correctAnswers,
       totalAnswers: state.totalAnswers,
       streak: state.streak,
       bestStreak: state.bestStreak,
-    },
-    // Optional: keep some round progress too
-    inProgress: state.screen === 'game' ? {
-      selectedGame: state.selectedGame,
-      selectedDiff: state.selectedDiff,
-      currentData: state.currentData,
-      roundXP: state.roundXP,
-      roundBreakdown: state.roundBreakdown,
-      roundResults: state.roundResults,
-      g1Step: state.g1Step,
-      g1Attempt: state.g1Attempt,
-      g1Options: state.g1Options,
-      g2HintsUsed: state.g2HintsUsed,
-      g2Answered: state.g2Answered,
-      // include medium options if mid-question
-      g2MediumOptions: state.g2MediumOptions,
-      // easy setup
-      _easySetup: state._easySetup || null
-    } : null
-  };
-}
-
-function saveToStorage() {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(serializeSave()));
-  } catch (e) {
-    // ignore quota/permission errors
-  }
+    }));
+  } catch {}
 }
 
 function loadFromStorage() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return;
-
-    const saved = JSON.parse(raw);
-    if (!saved || saved.version !== 1) return;
-
-    state.xp = saved.stats.xp ?? state.xp;
-    state.gamesPlayed = saved.stats.gamesPlayed ?? state.gamesPlayed;
-    state.correctAnswers = saved.stats.correctAnswers ?? state.correctAnswers;
-    state.totalAnswers = saved.stats.totalAnswers ?? state.totalAnswers;
-    state.streak = saved.stats.streak ?? state.streak;
-    state.bestStreak = saved.stats.bestStreak ?? state.bestStreak;
-
-    // Update UI after load
-    updateStats();
-
-    // Optional: restore in-progress game state if you want
-    // (You can skip restoring gameplay if you only care about stats.)
-    if (saved.inProgress) {
-      state.selectedGame = saved.inProgress.selectedGame ?? null;
-      state.selectedDiff = saved.inProgress.selectedDiff ?? null;
-      state.currentData = saved.inProgress.currentData ?? null;
-      state.roundXP = saved.inProgress.roundXP ?? 0;
-      state.roundBreakdown = saved.inProgress.roundBreakdown ?? [];
-      state.roundResults = saved.inProgress.roundResults ?? [];
-      state.g1Step = saved.inProgress.g1Step ?? 0;
-      state.g1Attempt = saved.inProgress.g1Attempt ?? 0;
-      state.g1Options = saved.inProgress.g1Options ?? [];
-      state.g2HintsUsed = saved.inProgress.g2HintsUsed ?? 0;
-      state.g2Answered = saved.inProgress.g2Answered ?? false;
-      state.g2MediumOptions = saved.inProgress.g2MediumOptions ?? [];
-      state._easySetup = saved.inProgress._easySetup ?? null;
-    }
-  } catch (e) {
-    // ignore parse errors
-  }
+    const s = JSON.parse(raw);
+    if (!s || s.version !== 2) return;
+    state.xp = s.xp ?? 0;
+    state.gamesPlayed = s.gamesPlayed ?? 0;
+    state.correctAnswers = s.correctAnswers ?? 0;
+    state.totalAnswers = s.totalAnswers ?? 0;
+    state.streak = s.streak ?? 0;
+    state.bestStreak = s.bestStreak ?? 0;
+  } catch {}
 }
+
+window.addEventListener('beforeunload', saveToStorage);
+window.addEventListener('pagehide', saveToStorage);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveToStorage();
+});
+
+loadFromStorage();
+updateStats();
 </script>
 </body>
 </html>
