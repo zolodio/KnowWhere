@@ -45,6 +45,7 @@ body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-prima
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes wordPop{0%{transform:scale(1.25);opacity:.6}100%{transform:scale(1);opacity:1}}
 @keyframes wordBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
 /* ===================== FILL-IN STYLES ===================== */
 .fillin-verse{font-family:var(--font-verse);font-size:17px;line-height:2.2;color:var(--text-primary);
@@ -71,6 +72,55 @@ body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-prima
 .app-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--gold-light);
   letter-spacing:3px;text-transform:uppercase;line-height:1.2;text-shadow:0 0 30px var(--gold-glow)}
 .app-subtitle{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);font-size:14px;margin-top:4px}
+
+/* ===================== TRANSLATION BUTTON ===================== */
+.translation-btn{display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-ui);font-size:13px;font-weight:600;
+  padding:7px 14px;border-radius:var(--radius-pill);
+  border:1.5px solid var(--border-active);background:var(--bg-card);
+  color:var(--gold-light);cursor:pointer;transition:all .25s ease;
+  margin-top:10px;letter-spacing:.5px}
+.translation-btn:hover{background:var(--bg-card-hover);border-color:var(--gold);
+  box-shadow:0 0 12px var(--gold-glow)}
+.translation-btn .t-tag{font-size:11px;font-weight:800;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--gold-dim),var(--gold));
+  color:#0a0f1e;padding:2px 7px;border-radius:20px;text-transform:uppercase}
+
+/* Translation modal */
+.trans-modal{position:fixed;inset:0;z-index:150;background:rgba(6,10,20,.88);
+  display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.trans-box{background:var(--bg-card);border:1px solid var(--border-active);border-radius:var(--radius);
+  width:100%;max-width:380px;overflow:hidden;animation:scaleIn .3s ease}
+.trans-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.trans-header h3{font-family:var(--font-display);font-size:15px;color:var(--gold-light);letter-spacing:1px}
+.trans-close{background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;
+  padding:4px 8px;border-radius:6px;transition:color .2s}
+.trans-close:hover{color:var(--text-primary)}
+.trans-search{padding:10px 16px;border-bottom:1px solid var(--border)}
+.trans-search input{width:100%;background:var(--bg-secondary);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:8px 12px;color:var(--text-primary);font-size:13px;
+  font-family:var(--font-ui);outline:none;transition:border-color .2s}
+.trans-search input:focus{border-color:var(--gold)}
+.trans-search input::placeholder{color:var(--text-muted)}
+.trans-list{max-height:340px;overflow-y:auto;padding:8px}
+.trans-list::-webkit-scrollbar{width:3px}
+.trans-list::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:3px}
+.trans-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:background .15s;border:1.5px solid transparent}
+.trans-item:hover{background:var(--bg-card-hover)}
+.trans-item.active{background:rgba(202,163,40,.08);border-color:var(--border-active)}
+.trans-item .t-abbr{font-family:var(--font-display);font-size:13px;font-weight:700;
+  color:var(--gold-light);min-width:48px;letter-spacing:.5px}
+.trans-item .t-name{flex:1}
+.trans-item .t-name .t-full{font-size:13px;color:var(--text-primary);font-weight:500;line-height:1.3}
+.trans-item .t-name .t-lang{font-size:11px;color:var(--text-muted);margin-top:1px}
+.trans-item .t-check{color:var(--gold);font-size:14px;opacity:0;transition:opacity .15s}
+.trans-item.active .t-check{opacity:1}
+.trans-section-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;
+  font-weight:700;padding:8px 12px 4px}
+.trans-empty{text-align:center;padding:24px;color:var(--text-muted);font-size:13px;font-style:italic;
+  font-family:var(--font-verse)}
 
 .stats-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:20px 0}
 .level-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -330,6 +380,13 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     <div class="app-icon"><i class="fa-solid fa-book-bible"></i></div>
     <h1 class="app-title">Scripture Quest</h1>
     <p class="app-subtitle">"Thy word is a lamp unto my feet"</p>
+    <!-- Translation Button -->
+    <button class="translation-btn" onclick="openTranslationModal()" id="translation-btn-display">
+      <i class="fa-solid fa-language" style="font-size:14px"></i>
+      <span class="t-tag" id="translation-tag">WEB</span>
+      <span id="translation-name-short">World English Bible</span>
+      <i class="fa-solid fa-chevron-down" style="font-size:10px;color:var(--text-muted)"></i>
+    </button>
   </div>
 
   <div class="stats-bar" id="stats-bar">
@@ -396,7 +453,7 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     <i class="fa-solid fa-play"></i> Begin
   </button>
   <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px">
-    Live verses from bible-api.com (WEB translation) &middot; Scores saved locally
+    Live verses from bible-api.com · <span id="footer-translation">WEB translation</span> · Scores saved locally
   </p>
 </div>
 
@@ -430,6 +487,154 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 </div>
 
 <script>
+// ===================== TRANSLATIONS =====================
+const TRANSLATIONS = [
+  // ── English ────────────────────────────────────────────────────────────────
+  {
+    id: 'web', tag: 'WEB', name: 'World English Bible', lang: 'English',
+    desc: 'Modern public domain translation, accurate and readable'
+  },
+  {
+    id: 'kjv', tag: 'KJV', name: 'King James Version', lang: 'English (1611)',
+    desc: 'The classic 1611 translation, beloved for its majestic prose'
+  },
+  {
+    id: 'asv', tag: 'ASV', name: 'American Standard Version', lang: 'English (1901)',
+    desc: 'Scholarly 1901 revision of the KJV, precise and widely respected'
+  },
+  {
+    id: 'darby', tag: 'DARBY', name: 'Darby Bible', lang: 'English (1890)',
+    desc: "J.N. Darby's 1890 literal translation, influential in prophecy study"
+  },
+  {
+    id: 'dra', tag: 'DRA', name: 'Douay-Rheims', lang: 'English (Catholic)',
+    desc: 'Historic Catholic English translation of the Latin Vulgate'
+  },
+  {
+    id: 'ylt', tag: 'YLT', name: "Young's Literal Translation", lang: 'English (1862)',
+    desc: "Robert Young's hyper-literal 1862 translation of the original texts"
+  },
+  {
+    id: 'bbe', tag: 'BBE', name: 'Bible in Basic English', lang: 'English',
+    desc: 'Simple vocabulary, accessible for all reading levels'
+  },
+  {
+    id: 'oeb-us', tag: 'OEB', name: 'Open English Bible (US)', lang: 'English',
+    desc: 'Contemporary open-license English translation'
+  },
+  {
+    id: 'webbe', tag: 'WEBBE', name: 'World English Bible (British)', lang: 'English (British)',
+    desc: 'British English edition of the WEB'
+  },
+  // ── Other Languages ────────────────────────────────────────────────────────
+  {
+    id: 'almeida', tag: 'ALM', name: 'Almeida Recebida', lang: 'Portuguese',
+    desc: 'Classic Portuguese translation by João Ferreira de Almeida'
+  },
+  {
+    id: 'rccv', tag: 'RCCV', name: 'Romanian Corrected Cornilescu', lang: 'Romanian',
+    desc: 'Corrected Cornilescu version in Romanian'
+  },
+];
+
+let currentTranslation = TRANSLATIONS[0]; // default WEB
+
+function openTranslationModal() {
+  const existing = document.getElementById('trans-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'trans-modal';
+  modal.id = 'trans-modal';
+  modal.innerHTML = `
+    <div class="trans-box">
+      <div class="trans-header">
+        <h3><i class="fa-solid fa-language" style="margin-right:8px;color:var(--gold)"></i>Bible Translation</h3>
+        <button class="trans-close" onclick="closeTranslationModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="trans-search">
+        <input type="text" id="trans-search-input" placeholder="Search translations…" oninput="filterTranslations()" autocomplete="off">
+      </div>
+      <div class="trans-list" id="trans-list">
+        ${renderTranslationList(TRANSLATIONS)}
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) closeTranslationModal(); });
+  document.body.appendChild(modal);
+  document.getElementById('trans-search-input').focus();
+}
+
+function renderTranslationList(list) {
+  const englishGroup = list.filter(t => t.lang.startsWith('English'));
+  const otherGroup   = list.filter(t => !t.lang.startsWith('English'));
+
+  let html = '';
+  if (englishGroup.length) {
+    html += `<div class="trans-section-label">English</div>`;
+    html += englishGroup.map(t => renderTranslationItem(t)).join('');
+  }
+  if (otherGroup.length) {
+    html += `<div class="trans-section-label">Other Languages</div>`;
+    html += otherGroup.map(t => renderTranslationItem(t)).join('');
+  }
+  return html || `<div class="trans-empty">No translations found</div>`;
+}
+
+function renderTranslationItem(t) {
+  const isActive = t.id === currentTranslation.id;
+  return `<div class="trans-item ${isActive ? 'active' : ''}" onclick="selectTranslation('${t.id}')">
+    <div class="t-abbr">${t.tag}</div>
+    <div class="t-name">
+      <div class="t-full">${escHtml(t.name)}</div>
+      <div class="t-lang">${escHtml(t.lang)} · ${escHtml(t.desc)}</div>
+    </div>
+    <i class="fa-solid fa-check t-check"></i>
+  </div>`;
+}
+
+function filterTranslations() {
+  const q = document.getElementById('trans-search-input').value.toLowerCase().trim();
+  const list = q
+    ? TRANSLATIONS.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.tag.toLowerCase().includes(q) ||
+        t.lang.toLowerCase().includes(q) ||
+        t.desc.toLowerCase().includes(q)
+      )
+    : TRANSLATIONS;
+  document.getElementById('trans-list').innerHTML = renderTranslationList(list);
+}
+
+function selectTranslation(id) {
+  const t = TRANSLATIONS.find(t => t.id === id);
+  if (!t) return;
+  currentTranslation = t;
+  updateTranslationDisplay();
+  closeTranslationModal();
+  showTranslationToast(t);
+}
+
+function updateTranslationDisplay() {
+  const t = currentTranslation;
+  document.getElementById('translation-tag').textContent = t.tag;
+  const short = t.name.length > 22 ? t.name.slice(0, 20) + '…' : t.name;
+  document.getElementById('translation-name-short').textContent = short;
+  document.getElementById('footer-translation').textContent = t.tag + ' translation';
+}
+
+function closeTranslationModal() {
+  const modal = document.getElementById('trans-modal');
+  if (modal) modal.remove();
+}
+
+function showTranslationToast(t) {
+  const toast = document.createElement('div');
+  toast.className = 'feedback correct';
+  toast.innerHTML = `<i class="fa-solid fa-check"></i> ${t.tag} — ${t.name}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 1800);
+}
+
 // ===================== BIBLE VERSE POOL =====================
 const VERSE_POOL = [
   { book: "Genesis", chapter: 1, verse: 1, testament: "Old", wrongBooks: ["Exodus","Numbers","Deuteronomy"] },
@@ -503,11 +708,9 @@ const NT_BOOKS = ['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians'
   '1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter',
   '1 John','2 John','3 John','Jude','Revelation'];
 
-const TRANSLATION = 'web';
-
 async function fetchVerse(book, chapter, verse) {
   const ref = encodeURIComponent(`${book} ${chapter}:${verse}`);
-  const url = `https://bible-api.com/${ref}?translation=${TRANSLATION}`;
+  const url = `https://bible-api.com/${ref}?translation=${currentTranslation.id}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
@@ -517,7 +720,7 @@ async function fetchVerse(book, chapter, verse) {
 
 async function fetchPassage(book, chapter, verseStart, verseEnd) {
   const ref = encodeURIComponent(`${book} ${chapter}:${verseStart}-${verseEnd}`);
-  const url = `https://bible-api.com/${ref}?translation=${TRANSLATION}`;
+  const url = `https://bible-api.com/${ref}?translation=${currentTranslation.id}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const data = await res.json();
@@ -555,12 +758,10 @@ const state = {
   g2Answered: false,
   g2MediumOptions: [],
   _easySetup: null,
-  // Scramble state
   scramble: {
     words: [], shuffled: [], answer: [], mistakes: 0, maxMistakes: 3,
     timerInterval: null, timeLeft: 90, finished: false, refRevealed: false, firstWordTime: null,
   },
-  // Fill-in state
   fillin: {
     words: [], blankIndices: [], bankWords: [], answers: [], bankUsed: [], mistakes: 0, finished: false,
   },
@@ -846,7 +1047,6 @@ async function startGame() {
 
 // ===================== FETCH WRONG VERSE DISTRACTORS =====================
 async function fetchMultipleWrongVerses(poolEntry, count) {
-  // Shuffle the pool each time so distractors are different every round
   const otherEntries = shuffleArray(
     VERSE_POOL.filter(e =>
       !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse)
@@ -856,8 +1056,6 @@ async function fetchMultipleWrongVerses(poolEntry, count) {
   for (const pick of otherEntries) {
     if (results.length >= count) break;
     try {
-      // Fetch the distractor verse itself (not verse+1) — this is the text that will
-      // stand in as a fake "next verse" for the current verse under test.
       const txt = await fetchVerse(pick.book, pick.chapter, pick.verse);
       if (txt && txt.length > 10) results.push(txt);
     } catch {}
@@ -877,18 +1075,7 @@ function generateWrongNumbers(correct, count, min, max) {
 }
 
 // ===================== GAME 3: VERSE SCRAMBLE =====================
-/*
-  The verse is tokenized into "tokens" preserving punctuation attached to words.
-  Each token is a displayable chip. The player taps chips from the bank to build the answer.
-  Tapping a chip in the answer zone removes it back to the bank.
-
-  Modes:
-  - relaxed:  unlimited mistakes, no timer, hint available (reveals first word)
-  - timed:    60s timer, unlimited mistakes, hint available
-  - perfect:  3 strikes max, no timer, no hint
-*/
 function tokenizeVerse(text) {
-  // Split on whitespace, keeping punctuation attached to the preceding word
   return text.split(/\s+/).filter(Boolean);
 }
 
@@ -932,16 +1119,13 @@ function initScramble(verseText, poolEntry) {
 }
 
 function buildShuffledOrder(words) {
-  // Create index array and shuffle, ensuring no word stays in its original position if possible
   const indices = words.map((_, i) => i);
-  // Fisher-Yates with a re-shuffle if any word lands in its original spot (best-effort)
   let shuffled = [...indices];
   for (let attempt = 0; attempt < 5; attempt++) {
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    // For very short verses, derangement might be impossible — accept any shuffle after 5 tries
     if (shuffled.length <= 2 || shuffled.some((v, i) => v !== i)) break;
   }
   return shuffled;
@@ -960,7 +1144,6 @@ function renderScramble() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
 
-  // Which original indices are still in the bank (not yet placed in answer)
   const placedIndices = new Set(sc.answer);
   const bankItems = sc.shuffled.filter(idx => !placedIndices.has(idx));
 
@@ -1047,7 +1230,6 @@ function scrambleAddWord(wordIdx) {
   if (sc.answer.includes(wordIdx)) return;
   sc.answer.push(wordIdx);
   renderScramble();
-  // Re-enable submit if all placed
   const btn = document.getElementById('scramble-submit');
   if (btn) btn.disabled = sc.answer.length < sc.words.length;
 }
@@ -1069,7 +1251,6 @@ function scrambleSubmit() {
   if (sc.answer.length < sc.words.length) return;
   if (sc.finished) return;
 
-  // Check correctness word-by-word
   const isCorrect = sc.answer.every((wordIdx, pos) => wordIdx === pos);
 
   if (isCorrect) {
@@ -1078,7 +1259,6 @@ function scrambleSubmit() {
     scrambleShowSuccess();
   } else {
     sc.mistakes++;
-    // Flash the wrong zone
     const zone = document.getElementById('answer-zone');
     if (zone) { zone.classList.add('wrong-flash'); setTimeout(() => zone.classList.remove('wrong-flash'), 500); }
 
@@ -1089,7 +1269,6 @@ function scrambleSubmit() {
       scrambleClearTimer();
       setTimeout(() => scrambleShowFailure(), 600);
     } else {
-      // Highlight misplaced words briefly, then reset
       setTimeout(() => {
         scrambleHighlightMistakes();
         setTimeout(() => {
@@ -1117,7 +1296,6 @@ function scrambleTimeUp() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
 
-  // Calculate partial credit
   const placed = sc.answer.length;
   const correct = sc.answer.filter((idx, pos) => idx === pos).length;
   const pct = sc.words.length > 0 ? Math.round(correct / sc.words.length * 100) : 0;
@@ -1141,7 +1319,7 @@ function scrambleTimeUp() {
     <div class="card">
       <div class="section-label" style="margin-bottom:6px">The full verse</div>
       <div class="verse-text" style="font-family:var(--font-verse);font-size:16px;line-height:1.7">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (WEB)</div>
+      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (${currentTranslation.tag})</div>
     </div>
     <div class="card xp-breakdown">
       ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
@@ -1174,7 +1352,7 @@ function scrambleShowFailure() {
     <div class="card">
       <div class="section-label" style="margin-bottom:6px">The full verse</div>
       <div class="verse-text" style="font-family:var(--font-verse);font-size:16px;line-height:1.7">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (WEB)</div>
+      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (${currentTranslation.tag})</div>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-secondary" style="flex:1" onclick="goHome()"><i class="fa-solid fa-house"></i> Menu</button>
@@ -1189,7 +1367,6 @@ function scrambleShowSuccess() {
   const diff = state.selectedScrambleDiff;
   const gc = document.getElementById('game-content');
 
-  // XP calculation
   let baseXP = 0;
   if (diff === 'relaxed')  baseXP = 40;
   if (diff === 'timed')    baseXP = 70;
@@ -1223,7 +1400,7 @@ function scrambleShowSuccess() {
     </div>
     <div class="verse-card">
       <div class="verse-text">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (WEB)</div>
+      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (${currentTranslation.tag})</div>
     </div>
     <div class="card xp-breakdown">
       ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
@@ -1238,15 +1415,6 @@ function scrambleShowSuccess() {
 }
 
 // ===================== FILL-IN MODE =====================
-/*
-  3–5 "key" content words are blanked out. The player sees the verse with gaps
-  and a small shuffled bank of just those missing words. They tap bank words
-  to fill blanks in order (left-to-right). Tapping a filled blank returns it
-  to the bank. A "Check" button verifies the answer.
-  
-  Key word selection: skip stop-words and very short words; prefer longer,
-  theologically meaningful words (nouns, verbs, adjectives).
-*/
 const STOP_WORDS = new Set([
   'a','an','the','and','but','or','nor','for','yet','so','in','on','at','to',
   'of','by','as','is','are','was','were','be','been','being','have','has','had',
@@ -1258,21 +1426,16 @@ const STOP_WORDS = new Set([
 ]);
 
 function pickFillInBlanks(words) {
-  // Score each word by desirability as a blank
   const scored = words.map((w, i) => {
     const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
     if (clean.length < 3) return { i, score: -1 };
     if (STOP_WORDS.has(clean)) return { i, score: 0 };
-    // Longer words = better blanks; words near middle of verse slightly preferred
     const lengthScore = Math.min(clean.length, 10);
-    const posScore = 1; // flat
-    return { i, score: lengthScore + posScore };
+    return { i, score: lengthScore + 1 };
   });
 
-  // Sort by score desc, then pick top N (between 3 and 5 depending on verse length)
   const eligible = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
   const count = Math.min(5, Math.max(3, Math.min(eligible.length, Math.floor(words.length * 0.3))));
-  // Take top `count` and sort them back by original position
   return eligible.slice(0, count).map(s => s.i).sort((a, b) => a - b);
 }
 
@@ -1281,7 +1444,6 @@ function initFillIn(verseText) {
   const blankIndices = pickFillInBlanks(words);
 
   if (blankIndices.length < 2) {
-    // Verse too short / all stop words — fall back to relaxed scramble
     state.selectedScrambleDiff = 'relaxed';
     initScramble(verseText, state.currentData);
     return;
@@ -1289,10 +1451,10 @@ function initFillIn(verseText) {
 
   state.fillin = {
     words,
-    blankIndices,            // sorted indices of blanked words
-    bankWords: shuffleArray(blankIndices.map(i => words[i])),  // shuffled pool
-    answers: new Array(blankIndices.length).fill(null), // null = empty, string = placed word
-    bankUsed: new Array(blankIndices.length).fill(false), // parallel to bankWords
+    blankIndices,
+    bankWords: shuffleArray(blankIndices.map(i => words[i])),
+    answers: new Array(blankIndices.length).fill(null),
+    bankUsed: new Array(blankIndices.length).fill(false),
     mistakes: 0,
     finished: false,
   };
@@ -1305,13 +1467,10 @@ function renderFillIn() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
 
-  // Build the verse HTML with blanks
   const blankSet = new Set(fi.blankIndices);
-  // Map blank index → slot index (0,1,2…)
   const blankToSlot = {};
   fi.blankIndices.forEach((bi, si) => { blankToSlot[bi] = si; });
 
-  // Find the first empty slot (the "active" blank)
   const nextEmpty = fi.answers.indexOf(null);
 
   const verseHtml = fi.words.map((w, i) => {
@@ -1328,7 +1487,6 @@ function renderFillIn() {
     return `<span class="${cls}" data-slot="${slot}" ${action}>${display}</span>`;
   }).join(' ');
 
-  // Bank
   const bankHtml = fi.bankWords.map((w, bi) =>
     fi.bankUsed[bi]
       ? `<div class="word-chip locked" style="opacity:.2;pointer-events:none">${escHtml(w)}</div>`
@@ -1366,24 +1524,22 @@ function renderFillIn() {
     </button>`;
 }
 
-// Track which slot is "selected" when bank item is tapped directly
 let _fillinActiveSlot = -1;
 
 function fillinBlankClick(slot) {
   _fillinActiveSlot = slot;
-  renderFillIn(); // re-render to update the active-target highlight
+  renderFillIn();
 }
 
 function fillinPickWord(bankIdx) {
   const fi = state.fillin;
   if (fi.bankUsed[bankIdx]) return;
 
-  // Find the target slot: prefer _fillinActiveSlot if it's empty, else first empty
   let targetSlot = _fillinActiveSlot;
   if (targetSlot < 0 || targetSlot >= fi.answers.length || fi.answers[targetSlot] !== null) {
     targetSlot = fi.answers.indexOf(null);
   }
-  if (targetSlot < 0) return; // all filled
+  if (targetSlot < 0) return;
 
   fi.answers[targetSlot] = fi.bankWords[bankIdx];
   fi.bankUsed[bankIdx] = true;
@@ -1395,11 +1551,10 @@ function fillinReturnWord(slot) {
   const fi = state.fillin;
   const word = fi.answers[slot];
   if (word === null) return;
-  // Find the bank index for this word (first unused match)
   const bi = fi.bankWords.findIndex((w, i) => fi.bankUsed[i] && w === word);
   if (bi >= 0) fi.bankUsed[bi] = false;
   fi.answers[slot] = null;
-  _fillinActiveSlot = slot; // keep focus on this slot
+  _fillinActiveSlot = slot;
   renderFillIn();
 }
 
@@ -1415,7 +1570,6 @@ function fillinSubmit() {
   const fi = state.fillin;
   if (fi.answers.some(a => a === null)) return;
 
-  // Check each slot
   const correct = fi.blankIndices.every((wordIdx, slot) => {
     const expected = fi.words[wordIdx].toLowerCase().replace(/[^a-z']/g,'');
     const given = (fi.answers[slot] || '').toLowerCase().replace(/[^a-z']/g,'');
@@ -1427,9 +1581,8 @@ function fillinSubmit() {
     fillinShowSuccess();
   } else {
     fi.mistakes++;
-    // Flash wrong blanks
     const blankEls = document.querySelectorAll('.fillin-blank.filled');
-    blankEls.forEach((el, idx) => {
+    blankEls.forEach((el) => {
       const slot = parseInt(el.dataset.slot);
       if (slot >= 0) {
         const wordIdx = fi.blankIndices[slot];
@@ -1440,7 +1593,6 @@ function fillinSubmit() {
     });
     showFeedback(false);
     setTimeout(() => {
-      // Clear wrong answers back to bank
       fi.blankIndices.forEach((wordIdx, slot) => {
         const expected = fi.words[wordIdx].toLowerCase().replace(/[^a-z']/g,'');
         const given = (fi.answers[slot] || '').toLowerCase().replace(/[^a-z']/g,'');
@@ -1485,7 +1637,7 @@ function fillinShowSuccess() {
     </div>
     <div class="verse-card">
       <div class="verse-text">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (WEB)</div>
+      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (${currentTranslation.tag})</div>
     </div>
     <div class="card xp-breakdown">
       ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
@@ -2029,7 +2181,7 @@ function showResults(gameType, data) {
     document.getElementById('results-title').textContent = isCorrectRound ? 'Well Done!' : 'Keep Learning!';
     document.getElementById('results-sub').textContent = `${data.book} ${data.chapter}:${data.verse}`;
     bd.innerHTML = `<div class="verse-card" style="margin:0"><div class="verse-text" style="font-size:15px">${escHtml(data.verse_text)}</div>
-      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse} (WEB)</div></div>`;
+      <div class="verse-ref">${data.book} ${data.chapter}:${data.verse} (${currentTranslation.tag})</div></div>`;
   }
   xpDiv.innerHTML = `<div class="xp-breakdown">
     ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
@@ -2109,6 +2261,7 @@ function saveToStorage() {
       version: 2, xp: state.xp, gamesPlayed: state.gamesPlayed,
       correctAnswers: state.correctAnswers, totalAnswers: state.totalAnswers,
       streak: state.streak, bestStreak: state.bestStreak,
+      translationId: currentTranslation.id,
     }));
   } catch {}
 }
@@ -2122,6 +2275,10 @@ function loadFromStorage() {
     state.xp = s.xp ?? 0; state.gamesPlayed = s.gamesPlayed ?? 0;
     state.correctAnswers = s.correctAnswers ?? 0; state.totalAnswers = s.totalAnswers ?? 0;
     state.streak = s.streak ?? 0; state.bestStreak = s.bestStreak ?? 0;
+    if (s.translationId) {
+      const saved = TRANSLATIONS.find(t => t.id === s.translationId);
+      if (saved) currentTranslation = saved;
+    }
   } catch {}
 }
 
@@ -2131,6 +2288,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 loadFromStorage();
 updateStats();
+updateTranslationDisplay();
 </script>
 </body>
 </html>
