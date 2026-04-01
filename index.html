@@ -46,6 +46,27 @@ body{font-family:var(--font-ui);background:var(--bg-deep);color:var(--text-prima
 @keyframes wordPop{0%{transform:scale(1.25);opacity:.6}100%{transform:scale(1);opacity:1}}
 @keyframes wordBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
+/* ===================== FILL-IN STYLES ===================== */
+.fillin-verse{font-family:var(--font-verse);font-size:17px;line-height:2.2;color:var(--text-primary);
+  padding:20px 20px 16px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));
+  border:1px solid var(--border-active);border-radius:var(--radius);margin:12px 0;position:relative}
+.fillin-verse::before{content:'\201C';position:absolute;top:-8px;left:16px;font-family:var(--font-verse);
+  font-size:64px;color:var(--gold-dim);line-height:1;opacity:.6;pointer-events:none}
+.fillin-blank{display:inline-flex;align-items:center;justify-content:center;
+  min-width:64px;height:30px;border-radius:6px;border:2px dashed var(--border-active);
+  background:var(--bg-secondary);vertical-align:middle;margin:0 2px;padding:0 8px;
+  font-family:var(--font-verse);font-size:15px;cursor:pointer;transition:all .2s;
+  color:transparent;user-select:none;-webkit-user-select:none}
+.fillin-blank.active-target{border-color:var(--gold);background:rgba(202,163,40,.08);
+  box-shadow:0 0 10px var(--gold-glow);animation:pulse 1.2s ease infinite}
+.fillin-blank.filled{border-style:solid;border-color:var(--gold-dim);background:rgba(202,163,40,.1);
+  color:var(--gold-light);cursor:pointer}
+.fillin-blank.filled:hover{border-color:var(--error);color:var(--error);background:var(--error-bg)}
+.fillin-blank.correct{border-style:solid;border-color:var(--success-border);
+  background:var(--success-bg);color:var(--success);cursor:default;pointer-events:none}
+.fillin-blank.wrong-flash{border-color:var(--error);background:var(--error-bg);
+  color:var(--error);animation:shake .4s ease}
+
 .app-icon{font-size:28px;color:var(--gold);margin-bottom:4px;filter:drop-shadow(0 0 8px var(--gold-glow))}
 .app-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--gold-light);
   letter-spacing:3px;text-transform:uppercase;line-height:1.2;text-shadow:0 0 30px var(--gold-glow)}
@@ -355,6 +376,9 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
   <div id="scramble-diff-section" style="display:none">
     <div class="section-label" style="margin-top:4px">Difficulty</div>
     <div class="pill-group" id="scramble-diff-pills">
+      <button class="pill small" data-sdiff="fillin" onclick="selectScrambleDiff('fillin')">
+        <span class="diff-label" style="background:rgba(96,165,250,.15);color:#60a5fa">Fill-In</span>
+      </button>
       <button class="pill small" data-sdiff="relaxed" onclick="selectScrambleDiff('relaxed')">
         <span class="diff-label diff-easy">Relaxed</span>
       </button>
@@ -533,17 +557,13 @@ const state = {
   _easySetup: null,
   // Scramble state
   scramble: {
-    words: [],          // canonical word order
-    shuffled: [],       // display order in bank
-    answer: [],         // current answer array (indices into words[])
-    mistakes: 0,
-    maxMistakes: 3,
-    timerInterval: null,
-    timeLeft: 90,
-    finished: false,
-    refRevealed: false,
-    firstWordTime: null,
-  }
+    words: [], shuffled: [], answer: [], mistakes: 0, maxMistakes: 3,
+    timerInterval: null, timeLeft: 90, finished: false, refRevealed: false, firstWordTime: null,
+  },
+  // Fill-in state
+  fillin: {
+    words: [], blankIndices: [], bankWords: [], answers: [], bankUsed: [], mistakes: 0, finished: false,
+  },
 };
 
 // ===================== LEVELS =====================
@@ -745,6 +765,7 @@ function showApiError(err, retryFn) {
 // ===================== START GAME =====================
 async function startGame() {
   scrambleClearTimer();
+  _fillinActiveSlot = -1;
   showScreen('game');
   state.roundXP = 0;
   state.roundBreakdown = [];
@@ -825,28 +846,21 @@ async function startGame() {
 
 // ===================== FETCH WRONG VERSE DISTRACTORS =====================
 async function fetchMultipleWrongVerses(poolEntry, count) {
-  const otherEntries = VERSE_POOL.filter(e =>
-    !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse)
+  // Shuffle the pool each time so distractors are different every round
+  const otherEntries = shuffleArray(
+    VERSE_POOL.filter(e =>
+      !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse)
+    )
   );
-  shuffleArray(otherEntries);
-  const picks = otherEntries.slice(0, count + 2);
   const results = [];
-  for (const pick of picks) {
+  for (const pick of otherEntries) {
     if (results.length >= count) break;
     try {
-      const txt = await fetchVerse(pick.book, pick.chapter, pick.verse + 1);
+      // Fetch the distractor verse itself (not verse+1) — this is the text that will
+      // stand in as a fake "next verse" for the current verse under test.
+      const txt = await fetchVerse(pick.book, pick.chapter, pick.verse);
       if (txt && txt.length > 10) results.push(txt);
     } catch {}
-  }
-  if (results.length < count) {
-    const fallbackEntries = otherEntries.slice(count + 2);
-    for (const pick of fallbackEntries) {
-      if (results.length >= count) break;
-      try {
-        const txt = await fetchVerse(pick.book, pick.chapter, pick.verse);
-        if (txt && txt.length > 10) results.push(txt);
-      } catch {}
-    }
   }
   return results.slice(0, count);
 }
@@ -893,6 +907,11 @@ function initScramble(verseText, poolEntry) {
   sc.timeLeft = diff === 'timed' ? 60 : 0;
 
   scrambleClearTimer();
+
+  if (diff === 'fillin') {
+    initFillIn(verseText);
+    return;
+  }
 
   if (diff === 'timed') {
     sc.timerInterval = setInterval(() => {
@@ -1218,7 +1237,268 @@ function scrambleShowSuccess() {
   addXP(state.roundXP);
 }
 
-// ===================== GAME 1: VERSE DETECTIVE =====================
+// ===================== FILL-IN MODE =====================
+/*
+  3–5 "key" content words are blanked out. The player sees the verse with gaps
+  and a small shuffled bank of just those missing words. They tap bank words
+  to fill blanks in order (left-to-right). Tapping a filled blank returns it
+  to the bank. A "Check" button verifies the answer.
+  
+  Key word selection: skip stop-words and very short words; prefer longer,
+  theologically meaningful words (nouns, verbs, adjectives).
+*/
+const STOP_WORDS = new Set([
+  'a','an','the','and','but','or','nor','for','yet','so','in','on','at','to',
+  'of','by','as','is','are','was','were','be','been','being','have','has','had',
+  'do','does','did','will','would','shall','should','may','might','must','can',
+  'could','not','no','it','its','he','she','they','we','you','i','me','my','him',
+  'her','his','our','their','your','us','that','this','these','those','with',
+  'from','into','up','out','than','then','when','if','all','which','who','whom',
+  'what','how','there','here','him','his','he','she','her','it','its','them',
+]);
+
+function pickFillInBlanks(words) {
+  // Score each word by desirability as a blank
+  const scored = words.map((w, i) => {
+    const clean = w.replace(/[^a-zA-Z']/g, '').toLowerCase();
+    if (clean.length < 3) return { i, score: -1 };
+    if (STOP_WORDS.has(clean)) return { i, score: 0 };
+    // Longer words = better blanks; words near middle of verse slightly preferred
+    const lengthScore = Math.min(clean.length, 10);
+    const posScore = 1; // flat
+    return { i, score: lengthScore + posScore };
+  });
+
+  // Sort by score desc, then pick top N (between 3 and 5 depending on verse length)
+  const eligible = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+  const count = Math.min(5, Math.max(3, Math.min(eligible.length, Math.floor(words.length * 0.3))));
+  // Take top `count` and sort them back by original position
+  return eligible.slice(0, count).map(s => s.i).sort((a, b) => a - b);
+}
+
+function initFillIn(verseText) {
+  const words = tokenizeVerse(verseText);
+  const blankIndices = pickFillInBlanks(words);
+
+  if (blankIndices.length < 2) {
+    // Verse too short / all stop words — fall back to relaxed scramble
+    state.selectedScrambleDiff = 'relaxed';
+    initScramble(verseText, state.currentData);
+    return;
+  }
+
+  state.fillin = {
+    words,
+    blankIndices,            // sorted indices of blanked words
+    bankWords: shuffleArray(blankIndices.map(i => words[i])),  // shuffled pool
+    answers: new Array(blankIndices.length).fill(null), // null = empty, string = placed word
+    bankUsed: new Array(blankIndices.length).fill(false), // parallel to bankWords
+    mistakes: 0,
+    finished: false,
+  };
+
+  renderFillIn();
+}
+
+function renderFillIn() {
+  const fi = state.fillin;
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+
+  // Build the verse HTML with blanks
+  const blankSet = new Set(fi.blankIndices);
+  // Map blank index → slot index (0,1,2…)
+  const blankToSlot = {};
+  fi.blankIndices.forEach((bi, si) => { blankToSlot[bi] = si; });
+
+  // Find the first empty slot (the "active" blank)
+  const nextEmpty = fi.answers.indexOf(null);
+
+  const verseHtml = fi.words.map((w, i) => {
+    if (!blankSet.has(i)) return escHtml(w);
+    const slot = blankToSlot[i];
+    const filled = fi.answers[slot];
+    let cls = 'fillin-blank';
+    if (filled !== null) cls += ' filled';
+    else if (slot === nextEmpty) cls += ' active-target';
+    const display = filled !== null ? escHtml(filled) : '&nbsp;'.repeat(Math.max(3, w.length));
+    const action = filled !== null
+      ? `onclick="fillinReturnWord(${slot})"`
+      : `onclick="fillinBlankClick(${slot})"`;
+    return `<span class="${cls}" data-slot="${slot}" ${action}>${display}</span>`;
+  }).join(' ');
+
+  // Bank
+  const bankHtml = fi.bankWords.map((w, bi) =>
+    fi.bankUsed[bi]
+      ? `<div class="word-chip locked" style="opacity:.2;pointer-events:none">${escHtml(w)}</div>`
+      : `<div class="word-chip" onclick="fillinPickWord(${bi})" data-bi="${bi}">${escHtml(w)}</div>`
+  ).join('');
+
+  const allFilled = fi.answers.every(a => a !== null);
+  const filledCount = fi.answers.filter(a => a !== null).length;
+  const total = fi.blankIndices.length;
+
+  gc.innerHTML = `
+    <div class="question-label" style="margin-bottom:4px">Fill in the missing words</div>
+    <div class="question-sub">Tap a word from the bank to place it in the highlighted blank</div>
+
+    <div class="fillin-verse" id="fillin-verse">${verseHtml}</div>
+
+    <div class="scramble-progress" style="margin:8px 0 4px">
+      <span>${filledCount}/${total} filled</span>
+      <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(filledCount/total*100)}%"></div></div>
+      <span>${Math.round(filledCount/total*100)}%</span>
+    </div>
+
+    <div class="section-label" style="margin:10px 0 4px">Word bank</div>
+    <div class="scramble-bank" id="fillin-bank">${bankHtml}</div>
+
+    <div style="display:flex;gap:8px;justify-content:center;margin:14px 0 8px">
+      <button class="hint-btn" onclick="fillinClearAll()" style="display:flex;align-items:center;gap:5px">
+        <i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Clear
+      </button>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="fillin-submit"
+      onclick="fillinSubmit()" ${allFilled ? '' : 'disabled'}>
+      <i class="fa-solid fa-check"></i> Check Answer
+    </button>`;
+}
+
+// Track which slot is "selected" when bank item is tapped directly
+let _fillinActiveSlot = -1;
+
+function fillinBlankClick(slot) {
+  _fillinActiveSlot = slot;
+  renderFillIn(); // re-render to update the active-target highlight
+}
+
+function fillinPickWord(bankIdx) {
+  const fi = state.fillin;
+  if (fi.bankUsed[bankIdx]) return;
+
+  // Find the target slot: prefer _fillinActiveSlot if it's empty, else first empty
+  let targetSlot = _fillinActiveSlot;
+  if (targetSlot < 0 || targetSlot >= fi.answers.length || fi.answers[targetSlot] !== null) {
+    targetSlot = fi.answers.indexOf(null);
+  }
+  if (targetSlot < 0) return; // all filled
+
+  fi.answers[targetSlot] = fi.bankWords[bankIdx];
+  fi.bankUsed[bankIdx] = true;
+  _fillinActiveSlot = -1;
+  renderFillIn();
+}
+
+function fillinReturnWord(slot) {
+  const fi = state.fillin;
+  const word = fi.answers[slot];
+  if (word === null) return;
+  // Find the bank index for this word (first unused match)
+  const bi = fi.bankWords.findIndex((w, i) => fi.bankUsed[i] && w === word);
+  if (bi >= 0) fi.bankUsed[bi] = false;
+  fi.answers[slot] = null;
+  _fillinActiveSlot = slot; // keep focus on this slot
+  renderFillIn();
+}
+
+function fillinClearAll() {
+  const fi = state.fillin;
+  fi.answers.fill(null);
+  fi.bankUsed.fill(false);
+  _fillinActiveSlot = -1;
+  renderFillIn();
+}
+
+function fillinSubmit() {
+  const fi = state.fillin;
+  if (fi.answers.some(a => a === null)) return;
+
+  // Check each slot
+  const correct = fi.blankIndices.every((wordIdx, slot) => {
+    const expected = fi.words[wordIdx].toLowerCase().replace(/[^a-z']/g,'');
+    const given = (fi.answers[slot] || '').toLowerCase().replace(/[^a-z']/g,'');
+    return expected === given;
+  });
+
+  if (correct) {
+    fi.finished = true;
+    fillinShowSuccess();
+  } else {
+    fi.mistakes++;
+    // Flash wrong blanks
+    const blankEls = document.querySelectorAll('.fillin-blank.filled');
+    blankEls.forEach((el, idx) => {
+      const slot = parseInt(el.dataset.slot);
+      if (slot >= 0) {
+        const wordIdx = fi.blankIndices[slot];
+        const expected = fi.words[wordIdx].toLowerCase().replace(/[^a-z']/g,'');
+        const given = (fi.answers[slot] || '').toLowerCase().replace(/[^a-z']/g,'');
+        if (expected !== given) el.classList.add('wrong-flash');
+      }
+    });
+    showFeedback(false);
+    setTimeout(() => {
+      // Clear wrong answers back to bank
+      fi.blankIndices.forEach((wordIdx, slot) => {
+        const expected = fi.words[wordIdx].toLowerCase().replace(/[^a-z']/g,'');
+        const given = (fi.answers[slot] || '').toLowerCase().replace(/[^a-z']/g,'');
+        if (expected !== given && fi.answers[slot] !== null) {
+          const bi = fi.bankWords.findIndex((w, i) => fi.bankUsed[i] && w === fi.answers[slot]);
+          if (bi >= 0) fi.bankUsed[bi] = false;
+          fi.answers[slot] = null;
+        }
+      });
+      renderFillIn();
+    }, 700);
+  }
+}
+
+function fillinShowSuccess() {
+  const fi = state.fillin;
+  const data = state.currentData;
+  const gc = document.getElementById('game-content');
+
+  const baseXP = 25;
+  const mistakePenalty = fi.mistakes * 5;
+  const totalXP = Math.max(5, baseXP - mistakePenalty);
+  const perfect = fi.mistakes === 0;
+
+  state.roundXP = totalXP;
+  state.roundBreakdown = [{ label: `${fi.blankIndices.length} words filled in`, xp: baseXP }];
+  if (mistakePenalty) state.roundBreakdown.push({ label: `${fi.mistakes} wrong attempt${fi.mistakes > 1 ? 's' : ''}`, xp: -mistakePenalty });
+
+  state.correctAnswers++;
+  state.totalAnswers++;
+  state.streak++;
+  if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  state.gamesPlayed++;
+
+  if (perfect) spawnConfetti();
+
+  gc.innerHTML = `
+    <div style="text-align:center;margin:16px 0">
+      <div style="font-size:48px;margin-bottom:8px">${perfect ? '🌟' : '✅'}</div>
+      <h3 style="font-family:var(--font-display);color:var(--gold-light);margin-bottom:6px">${perfect ? 'Perfect Fill-In!' : 'Well done!'}</h3>
+      <p style="color:var(--text-secondary);font-size:13px">${perfect ? 'Every word in its place.' : `Completed with ${fi.mistakes} wrong attempt${fi.mistakes !== 1 ? 's' : ''}.`}</p>
+    </div>
+    <div class="verse-card">
+      <div class="verse-text">${escHtml(data.verse_text)}</div>
+      <div class="verse-ref">${escHtml(data.book)} ${data.chapter}:${data.verse} (WEB)</div>
+    </div>
+    <div class="card xp-breakdown">
+      ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+      <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-secondary" style="flex:1" onclick="goHome()"><i class="fa-solid fa-house"></i> Menu</button>
+      <button class="btn btn-primary" style="flex:1" onclick="playAgain()"><i class="fa-solid fa-rotate-right"></i> Next</button>
+    </div>`;
+
+  addXP(state.roundXP);
+}
+
 function renderG1Steps() {
   const steps = ['Testament', 'Book', 'Chapter', 'Verse'];
   document.getElementById('step-indicator').innerHTML = steps.map((_, i) => {
@@ -1659,7 +1939,7 @@ function initNeighborEasy(data) {
       </div></div>`;
     return;
   }
-  const wrongs = data.wrong_options || [];
+  const wrongs = shuffleArray(data.wrong_options || []);
   fakeVerse = wrongs.length > 0 ? wrongs[0] : 'And they went on their way, giving thanks to the Lord.';
   let beforeText, afterText;
   if (realDir === 'after') { beforeText = fakeVerse; afterText = realVerse; }
