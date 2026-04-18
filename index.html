@@ -3097,7 +3097,7 @@ function answerGH1(btn, chosen, correct) {
 function renderGHPhase2() {
   const { entry } = state.gh;
   const correctOpt = { ref: entry.verseRef, snippet: entry.verseSnippet };
-  const wrongOpts = entry.wrongVerses.slice(0, 3);
+  const wrongOpts = entry.wrongVerses.slice(0, 3).map(v => ({ref: v.ref, snippet: v.text || v.snippet}));
   const allOpts = shuffleArray([correctOpt, ...wrongOpts]);
   const gc = document.getElementById('game-content');
   gc.innerHTML = `
