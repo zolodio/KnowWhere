@@ -396,6 +396,98 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
   text-align:center;justify-content:center;margin-bottom:8px;font-family:var(--font-ui)}
 .drag-tip i{font-size:10px;color:var(--gold-dim)}
 
+/* ===================== WHO SAID IT ===================== */
+.quote-card{position:relative;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));
+  border:1px solid var(--border-active);border-radius:var(--radius);padding:28px 24px 20px;margin:12px 0}
+.quote-card::before{content:'\201C';position:absolute;top:-8px;left:16px;font-family:var(--font-verse);
+  font-size:64px;color:var(--gold-dim);line-height:1;opacity:.6}
+.quote-text{font-family:var(--font-verse);font-size:17px;line-height:1.7;color:var(--text-primary);position:relative;z-index:1;font-style:italic}
+.quote-ref{font-size:12px;color:var(--gold);font-weight:600;margin-top:10px;letter-spacing:1px;text-transform:uppercase;font-family:var(--font-ui)}
+.speaker-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);
+  background:linear-gradient(135deg,rgba(202,163,40,.15),rgba(202,163,40,.06));
+  border:1.5px solid var(--border-active);font-family:var(--font-display);font-size:16px;
+  font-weight:600;color:var(--gold-light);margin:12px 0;letter-spacing:.5px}
+.style-toggle{display:flex;gap:8px;margin:8px 0 12px;justify-content:center}
+.style-btn{font-size:12px;padding:6px 14px;border-radius:var(--radius-pill);border:1.5px solid var(--border);
+  background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all .2s;
+  font-family:var(--font-ui);font-weight:600}
+.style-btn.active{background:rgba(202,163,40,.1);border-color:var(--border-active);color:var(--gold-light)}
+
+/* ===================== GREEK/HEBREW ===================== */
+.word-display{text-align:center;padding:28px 20px 20px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));
+  border:1px solid var(--border-active);border-radius:var(--radius);margin:12px 0}
+.word-original{font-size:38px;color:var(--gold-light);letter-spacing:2px;line-height:1.2;
+  text-shadow:0 0 20px var(--gold-glow);font-weight:400}
+.word-transliteration{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);
+  font-size:16px;margin-top:6px}
+.word-language{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;
+  color:var(--text-muted);margin-top:4px}
+.part-indicator{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;
+  font-size:12px;color:var(--text-muted)}
+.part-indicator .part-num{font-family:var(--font-display);font-size:13px;font-weight:700;
+  color:var(--gold);padding:2px 10px;border:1px solid var(--border-active);border-radius:var(--radius-pill)}
+.verse-snippet{font-family:var(--font-verse);font-size:14px;line-height:1.6;color:var(--text-primary);
+  padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-sm);
+  border-left:3px solid var(--gold-dim)}
+.verse-snippet .highlight{color:var(--gold-light);font-weight:600;background:rgba(202,163,40,.12);
+  padding:1px 4px;border-radius:3px}
+.verse-snippet-ref{font-size:11px;color:var(--text-muted);margin-top:6px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1px}
+
+/* ===================== ORDER THE BOOKS ===================== */
+.books-answer-zone{min-height:72px;background:var(--bg-secondary);border:2px dashed var(--border-active);
+  border-radius:var(--radius);padding:10px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;
+  margin-bottom:12px;transition:all .3s;position:relative}
+.books-answer-zone.has-books{border-style:solid}
+.books-answer-zone.drop-active{border-color:var(--gold)!important;background:rgba(202,163,40,.06)!important;
+  box-shadow:0 0 0 2px var(--gold-dim)!important}
+.books-answer-zone .zone-placeholder{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;color:var(--text-muted);font-size:13px;font-family:var(--font-verse);
+  font-style:italic;pointer-events:none}
+.books-bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 0;min-height:44px;
+  border-radius:var(--radius);border:2px solid transparent;transition:all .2s}
+.books-bank.drop-active{border-color:var(--error)!important;border-style:dashed!important;background:rgba(240,72,72,.04)!important}
+.book-chip{font-family:var(--font-ui);font-size:12px;font-weight:600;padding:6px 12px;
+  border-radius:var(--radius-sm);border:1.5px solid var(--border-active);background:var(--bg-card);
+  color:var(--text-primary);cursor:grab;transition:all .18s ease;user-select:none;-webkit-user-select:none;
+  touch-action:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.book-chip:active{cursor:grabbing}
+.book-chip:hover{border-color:var(--gold);color:var(--gold-light);background:var(--bg-card-hover);transform:translateY(-2px)}
+.book-chip.in-answer{background:linear-gradient(135deg,rgba(202,163,40,.12),rgba(202,163,40,.06));border-color:var(--gold-dim);color:var(--gold-light)}
+.book-chip.correct-placed{background:var(--success-bg);border-color:var(--success-border);color:var(--success);cursor:default;pointer-events:none}
+.book-chip.wrong-placed{background:var(--error-bg);border-color:var(--error-border);color:var(--error)}
+.book-chip.drag-over{border-color:var(--gold)!important;background:rgba(202,163,40,.22)!important;
+  transform:translateY(-4px) scale(1.06)!important;box-shadow:0 0 0 2px var(--gold-dim)!important}
+.book-chip.dragging-ghost{opacity:.25!important;transform:none!important;pointer-events:none}
+.book-chip-x{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;
+  border-radius:50%;font-size:10px;font-weight:700;margin-left:4px;flex-shrink:0;color:var(--text-muted);transition:all .15s;cursor:pointer}
+.book-chip-x:hover{background:var(--error-bg);color:var(--error)}
+.books-controls{display:flex;gap:8px;justify-content:space-between;margin-bottom:10px;align-items:center}
+.books-count{font-size:12px;color:var(--text-muted)}
+.check-order-btn{font-size:13px;padding:8px 18px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));
+  color:#0a0f1e;border:none;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;
+  font-family:var(--font-ui);transition:all .2s}
+.check-order-btn:hover{box-shadow:0 4px 16px var(--gold-glow)}
+.check-order-btn:disabled{opacity:.4;cursor:not-allowed}
+.order-result-row{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--radius-sm);
+  font-size:13px;margin-bottom:4px;font-family:var(--font-ui)}
+.order-result-row.ok{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.order-result-row.bad{background:var(--error-bg);color:var(--error);border:1px solid var(--error-border)}
+
+/* ===================== WHAT IS IT ABOUT ===================== */
+.ref-display{text-align:center;padding:24px 20px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));
+  border:1px solid var(--border-active);border-radius:var(--radius);margin:12px 0}
+.ref-display .ref-main{font-family:var(--font-display);font-size:22px;color:var(--gold-light);
+  font-weight:600;letter-spacing:1px}
+.ref-display .ref-context{font-family:var(--font-verse);font-style:italic;color:var(--text-secondary);
+  font-size:13px;margin-top:8px}
+.desc-option{padding:14px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);
+  background:var(--bg-card);cursor:pointer;transition:all .2s;margin-bottom:10px;
+  font-family:var(--font-verse);font-size:15px;line-height:1.5;color:var(--text-primary)}
+.desc-option:hover{border-color:var(--border-active);background:var(--bg-card-hover)}
+.desc-option.correct{border-color:var(--success-border);background:var(--success-bg);color:var(--success)}
+.desc-option.wrong{border-color:var(--error-border);background:var(--error-bg);color:var(--error);animation:shake .4s}
+
 @media(max-width:380px){
   .app-title{font-size:22px;letter-spacing:2px}
   .pill{padding:8px 14px;font-size:13px}
@@ -446,6 +538,18 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     <button class="pill" data-game="scramble" onclick="selectGame('scramble')">
       <i class="fa-solid fa-shuffle" style="margin-right:4px"></i> Verse Scramble
     </button>
+    <button class="pill" data-game="whosaidit" onclick="selectGame('whosaidit')">
+      <i class="fa-solid fa-comment-dots" style="margin-right:4px"></i> Who Said It?
+    </button>
+    <button class="pill" data-game="greekhebrew" onclick="selectGame('greekhebrew')">
+      <i class="fa-solid fa-language" style="margin-right:4px"></i> Greek / Hebrew
+    </button>
+    <button class="pill" data-game="orderbooks" onclick="selectGame('orderbooks')">
+      <i class="fa-solid fa-list-ol" style="margin-right:4px"></i> Order the Books
+    </button>
+    <button class="pill" data-game="whatisitabout" onclick="selectGame('whatisitabout')">
+      <i class="fa-solid fa-circle-question" style="margin-right:4px"></i> What Is It About?
+    </button>
   </div>
 
   <div id="difficulty-section" style="display:none">
@@ -481,7 +585,54 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     </div>
   </div>
 
-  <div style="flex:1"></div>
+  <!-- WHO SAID IT difficulty + style -->
+  <div id="wsi-section" style="display:none">
+    <div class="section-label" style="margin-top:4px">Style</div>
+    <div class="style-toggle" id="wsi-style-pills">
+      <button class="style-btn active" data-wsi-style="quote2speaker" onclick="selectWSIStyle('quote2speaker')">
+        <i class="fa-solid fa-quote-left"></i> Quote → Speaker
+      </button>
+      <button class="style-btn" data-wsi-style="speaker2quote" onclick="selectWSIStyle('speaker2quote')">
+        <i class="fa-solid fa-user"></i> Speaker → Quote
+      </button>
+    </div>
+    <div class="section-label" style="margin-top:4px">Difficulty</div>
+    <div class="pill-group" id="wsi-diff-pills">
+      <button class="pill small" data-wdiff="easy" onclick="selectWSIDiff('easy')"><span class="diff-label diff-easy">Easy</span></button>
+      <button class="pill small" data-wdiff="medium" onclick="selectWSIDiff('medium')"><span class="diff-label diff-med">Medium</span></button>
+      <button class="pill small" data-wdiff="hard" onclick="selectWSIDiff('hard')"><span class="diff-label diff-hard">Hard</span></button>
+    </div>
+  </div>
+
+  <!-- GREEK/HEBREW difficulty -->
+  <div id="gh-section" style="display:none">
+    <div class="section-label" style="margin-top:4px">Difficulty</div>
+    <div class="pill-group" id="gh-diff-pills">
+      <button class="pill small" data-ghdiff="easy" onclick="selectGHDiff('easy')"><span class="diff-label diff-easy">Easy</span></button>
+      <button class="pill small" data-ghdiff="medium" onclick="selectGHDiff('medium')"><span class="diff-label diff-med">Medium</span></button>
+      <button class="pill small" data-ghdiff="hard" onclick="selectGHDiff('hard')"><span class="diff-label diff-hard">Hard</span></button>
+    </div>
+  </div>
+
+  <!-- ORDER BOOKS difficulty -->
+  <div id="ob-section" style="display:none">
+    <div class="section-label" style="margin-top:4px">Difficulty</div>
+    <div class="pill-group" id="ob-diff-pills">
+      <button class="pill small" data-obdiff="easy" onclick="selectOBDiff('easy')"><span class="diff-label diff-easy">5 Books</span></button>
+      <button class="pill small" data-obdiff="medium" onclick="selectOBDiff('medium')"><span class="diff-label diff-med">8 Books</span></button>
+      <button class="pill small" data-obdiff="hard" onclick="selectOBDiff('hard')"><span class="diff-label diff-hard">12 Books</span></button>
+    </div>
+  </div>
+
+  <!-- WHAT IS IT ABOUT difficulty -->
+  <div id="wiia-section" style="display:none">
+    <div class="section-label" style="margin-top:4px">Difficulty</div>
+    <div class="pill-group" id="wiia-diff-pills">
+      <button class="pill small" data-wiiadiff="easy" onclick="selectWIIADiff('easy')"><span class="diff-label diff-easy">Easy</span></button>
+      <button class="pill small" data-wiiadiff="medium" onclick="selectWIIADiff('medium')"><span class="diff-label diff-med">Medium</span></button>
+      <button class="pill small" data-wiiadiff="hard" onclick="selectWIIADiff('hard')"><span class="diff-label diff-hard">Hard</span></button>
+    </div>
+  </div>
   <button class="btn btn-primary btn-full" id="start-btn" onclick="startGame()" disabled>
     <i class="fa-solid fa-play"></i> Begin
   </button>
@@ -712,6 +863,8 @@ async function fetchPassage(book, chapter, verseStart, verseEnd) {
 // ===================== STATE =====================
 const state = {
   screen: 'home', selectedGame: null, selectedDiff: null, selectedScrambleDiff: null,
+  selectedWSIStyle: 'quote2speaker', selectedWSIDiff: null, selectedGHDiff: null,
+  selectedOBDiff: null, selectedWIIADiff: null,
   xp: 0, gamesPlayed: 0, correctAnswers: 0, totalAnswers: 0, streak: 0, bestStreak: 0,
   currentData: null, roundXP: 0, roundBreakdown: [], roundResults: [],
   g1Step: 0, g1Attempt: 0, g1Options: [],
@@ -723,6 +876,10 @@ const state = {
   fillin: {
     words: [], blankIndices: [], bankWords: [], answers: [], bankUsed: [], mistakes: 0, finished: false,
   },
+  wsi: { answered: false, entry: null },
+  gh: { phase: 1, entry: null, answered: false, part1Correct: false },
+  ob: { books: [], answer: [], finished: false, checked: false },
+  wiia: { answered: false, entry: null },
 };
 
 // ===================== DRAG & DROP STATE =====================
@@ -851,21 +1008,38 @@ function selectGame(game) {
   state.selectedGame = game;
   state.selectedDiff = null;
   state.selectedScrambleDiff = null;
+  state.selectedWSIStyle = 'quote2speaker';
+  state.selectedWSIDiff = null;
+  state.selectedGHDiff = null;
+  state.selectedOBDiff = null;
+  state.selectedWIIADiff = null;
   document.querySelectorAll('#game-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.game === game));
   const diffSec = document.getElementById('difficulty-section');
   const scrambleDiffSec = document.getElementById('scramble-diff-section');
+  ['wsi-section','gh-section','ob-section','wiia-section'].forEach(id => document.getElementById(id).style.display = 'none');
   diffSec.style.display = 'none';
   scrambleDiffSec.style.display = 'none';
+  document.getElementById('start-btn').disabled = true;
   if (game === 'neighbor') {
     diffSec.style.display = '';
     document.querySelectorAll('#diff-pills .pill').forEach(p => p.classList.remove('active'));
-    document.getElementById('start-btn').disabled = true;
   } else if (game === 'scramble') {
     scrambleDiffSec.style.display = '';
     document.querySelectorAll('#scramble-diff-pills .pill').forEach(p => p.classList.remove('active'));
-    document.getElementById('start-btn').disabled = true;
-  } else {
+  } else if (game === 'detective') {
     document.getElementById('start-btn').disabled = false;
+  } else if (game === 'whosaidit') {
+    document.getElementById('wsi-section').style.display = '';
+    document.querySelectorAll('#wsi-diff-pills .pill').forEach(p => p.classList.remove('active'));
+  } else if (game === 'greekhebrew') {
+    document.getElementById('gh-section').style.display = '';
+    document.querySelectorAll('#gh-diff-pills .pill').forEach(p => p.classList.remove('active'));
+  } else if (game === 'orderbooks') {
+    document.getElementById('ob-section').style.display = '';
+    document.querySelectorAll('#ob-diff-pills .pill').forEach(p => p.classList.remove('active'));
+  } else if (game === 'whatisitabout') {
+    document.getElementById('wiia-section').style.display = '';
+    document.querySelectorAll('#wiia-diff-pills .pill').forEach(p => p.classList.remove('active'));
   }
 }
 
@@ -878,6 +1052,35 @@ function selectDiff(diff) {
 function selectScrambleDiff(diff) {
   state.selectedScrambleDiff = diff;
   document.querySelectorAll('#scramble-diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.sdiff === diff));
+  document.getElementById('start-btn').disabled = false;
+}
+
+function selectWSIStyle(style) {
+  state.selectedWSIStyle = style;
+  document.querySelectorAll('#wsi-style-pills .style-btn').forEach(p => p.classList.toggle('active', p.dataset.wsiStyle === style));
+}
+
+function selectWSIDiff(diff) {
+  state.selectedWSIDiff = diff;
+  document.querySelectorAll('#wsi-diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.wdiff === diff));
+  document.getElementById('start-btn').disabled = false;
+}
+
+function selectGHDiff(diff) {
+  state.selectedGHDiff = diff;
+  document.querySelectorAll('#gh-diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.ghdiff === diff));
+  document.getElementById('start-btn').disabled = false;
+}
+
+function selectOBDiff(diff) {
+  state.selectedOBDiff = diff;
+  document.querySelectorAll('#ob-diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.obdiff === diff));
+  document.getElementById('start-btn').disabled = false;
+}
+
+function selectWIIADiff(diff) {
+  state.selectedWIIADiff = diff;
+  document.querySelectorAll('#wiia-diff-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.wiiadiff === diff));
   document.getElementById('start-btn').disabled = false;
 }
 
@@ -1002,6 +1205,30 @@ async function startGame() {
       };
       initScramble(verseText, poolEntry);
     } catch (err) { showApiError(err, startGame); }
+
+  } else if (state.selectedGame === 'whosaidit') {
+    document.getElementById('game-title').textContent = 'Who Said It?';
+    document.getElementById('step-indicator').innerHTML = '';
+    document.getElementById('game-score-mini').textContent = '';
+    initWSI();
+
+  } else if (state.selectedGame === 'greekhebrew') {
+    document.getElementById('game-title').textContent = 'Greek / Hebrew Helper';
+    document.getElementById('step-indicator').innerHTML = '';
+    document.getElementById('game-score-mini').textContent = '';
+    initGH();
+
+  } else if (state.selectedGame === 'orderbooks') {
+    document.getElementById('game-title').textContent = 'Order the Books';
+    document.getElementById('step-indicator').innerHTML = '';
+    document.getElementById('game-score-mini').textContent = '';
+    initOB();
+
+  } else if (state.selectedGame === 'whatisitabout') {
+    document.getElementById('game-title').textContent = 'What Is It About?';
+    document.getElementById('step-indicator').innerHTML = '';
+    document.getElementById('game-score-mini').textContent = '';
+    initWIIA();
   }
 }
 
@@ -2449,7 +2676,807 @@ function compareTexts(userText, correctText) {
   return { accuracy, userHtml, correctHtml };
 }
 
-// ===================== HELPERS =====================
+// ===================== WHO SAID IT DATA =====================
+const WHO_SAID_IT_DATA = [
+  // EASY
+  { speaker:'Jesus', quote:'"I am the way, the truth, and the life. No one comes to the Father except through me."', ref:'John 14:6', difficulty:'easy',
+    wrongSpeakers:['Paul','Peter','John'], wrongQuotes:[
+      {text:'"I can do all things through him who strengthens me."', speaker:'Paul', ref:'Philippians 4:13'},
+      {text:'"The Lord is my shepherd; I shall not want."', speaker:'David', ref:'Psalm 23:1'},
+      {text:'"For it is by grace you have been saved, through faith."', speaker:'Paul', ref:'Ephesians 2:8'}
+    ]},
+  { speaker:'David', quote:'"The Lord is my shepherd; I shall not want."', ref:'Psalm 23:1', difficulty:'easy',
+    wrongSpeakers:['Solomon','Isaiah','Moses'], wrongQuotes:[
+      {text:'"I am the way, the truth, and the life."', speaker:'Jesus', ref:'John 14:6'},
+      {text:'"Trust in the Lord with all your heart."', speaker:'Solomon', ref:'Proverbs 3:5'},
+      {text:'"Be still, and know that I am God."', speaker:'God (Psalmist)', ref:'Psalm 46:10'}
+    ]},
+  { speaker:'Paul', quote:'"I can do all things through him who strengthens me."', ref:'Philippians 4:13', difficulty:'easy',
+    wrongSpeakers:['Jesus','Peter','James'], wrongQuotes:[
+      {text:'"The Lord is my shepherd; I shall not want."', speaker:'David', ref:'Psalm 23:1'},
+      {text:'"For God so loved the world that he gave his only Son."', speaker:'John (Gospel)', ref:'John 3:16'},
+      {text:'"Be strong and courageous."', speaker:'God (to Joshua)', ref:'Joshua 1:9'}
+    ]},
+  { speaker:'Solomon', quote:'"Trust in the Lord with all your heart, and do not lean on your own understanding."', ref:'Proverbs 3:5', difficulty:'easy',
+    wrongSpeakers:['David','Paul','Moses'], wrongQuotes:[
+      {text:'"I can do all things through him who strengthens me."', speaker:'Paul', ref:'Phil 4:13'},
+      {text:'"The Lord is my shepherd; I shall not want."', speaker:'David', ref:'Psalm 23:1'},
+      {text:'"For God so loved the world."', speaker:'John (Gospel)', ref:'John 3:16'}
+    ]},
+  { speaker:'Moses', quote:'"Hear, O Israel: The Lord our God, the Lord is one."', ref:'Deuteronomy 6:4', difficulty:'easy',
+    wrongSpeakers:['Joshua','Elijah','Isaiah'], wrongQuotes:[
+      {text:'"Trust in the Lord with all your heart."', speaker:'Solomon', ref:'Prov 3:5'},
+      {text:'"I am the way, the truth, and the life."', speaker:'Jesus', ref:'John 14:6'},
+      {text:'"The Lord is my shepherd."', speaker:'David', ref:'Psalm 23:1'}
+    ]},
+
+  // MEDIUM
+  { speaker:'Ruth', quote:'"Where you go I will go, and where you stay I will stay."', ref:'Ruth 1:16', difficulty:'medium',
+    wrongSpeakers:['Naomi','Esther','Mary'], wrongQuotes:[
+      {text:'"Though I walk through the valley of the shadow of death, I will fear no evil."', speaker:'David', ref:'Psalm 23:4'},
+      {text:'"Am I my brother\'s keeper?"', speaker:'Cain', ref:'Genesis 4:9'},
+      {text:'"Here am I. Send me!"', speaker:'Isaiah', ref:'Isaiah 6:8'}
+    ]},
+  { speaker:'Isaiah', quote:'"Here am I. Send me!"', ref:'Isaiah 6:8', difficulty:'medium',
+    wrongSpeakers:['Jeremiah','Ezekiel','Samuel'], wrongQuotes:[
+      {text:'"Where you go I will go."', speaker:'Ruth', ref:'Ruth 1:16'},
+      {text:'"The Lord is my light and my salvation—whom shall I fear?"', speaker:'David', ref:'Psalm 27:1'},
+      {text:'"I know the plans I have for you, declares the Lord."', speaker:'Jeremiah', ref:'Jer 29:11'}
+    ]},
+  { speaker:'Jeremiah', quote:'"For I know the plans I have for you, declares the Lord, plans to prosper you."', ref:'Jeremiah 29:11', difficulty:'medium',
+    wrongSpeakers:['Isaiah','Ezekiel','Daniel'], wrongQuotes:[
+      {text:'"Here am I. Send me!"', speaker:'Isaiah', ref:'Isaiah 6:8'},
+      {text:'"Where you go I will go."', speaker:'Ruth', ref:'Ruth 1:16'},
+      {text:'"The fear of the Lord is the beginning of wisdom."', speaker:'Solomon', ref:'Prov 9:10'}
+    ]},
+  { speaker:'Cain', quote:'"Am I my brother\'s keeper?"', ref:'Genesis 4:9', difficulty:'medium',
+    wrongSpeakers:['Abel','Adam','Lamech'], wrongQuotes:[
+      {text:'"Here am I. Send me!"', speaker:'Isaiah', ref:'Isaiah 6:8'},
+      {text:'"Where you go I will go."', speaker:'Ruth', ref:'Ruth 1:16'},
+      {text:'"The Lord is my shepherd."', speaker:'David', ref:'Psalm 23:1'}
+    ]},
+  { speaker:'Peter', quote:'"You are the Messiah, the Son of the living God."', ref:'Matthew 16:16', difficulty:'medium',
+    wrongSpeakers:['Thomas','John','Nathanael'], wrongQuotes:[
+      {text:'"Unless I see the nail marks in his hands... I will not believe."', speaker:'Thomas', ref:'John 20:25'},
+      {text:'"Rabbi, you are the Son of God; you are the king of Israel."', speaker:'Nathanael', ref:'John 1:49'},
+      {text:'"Lord, to whom shall we go? You have the words of eternal life."', speaker:'Peter', ref:'John 6:68'}
+    ]},
+
+  // HARD
+  { speaker:'Thomas', quote:'"Unless I see the nail marks in his hands and put my finger where the nails were, I will not believe."', ref:'John 20:25', difficulty:'hard',
+    wrongSpeakers:['Peter','Judas','Philip'], wrongQuotes:[
+      {text:'"Lord, show us the Father and that will be enough for us."', speaker:'Philip', ref:'John 14:8'},
+      {text:'"You are the Messiah, the Son of the living God."', speaker:'Peter', ref:'Matt 16:16'},
+      {text:'"What is truth?"', speaker:'Pilate', ref:'John 18:38'}
+    ]},
+  { speaker:'Job', quote:'"I know that my redeemer lives, and that in the end he will stand on the earth."', ref:'Job 19:25', difficulty:'hard',
+    wrongSpeakers:['Elijah','Isaiah','Daniel'], wrongQuotes:[
+      {text:'"Though he slay me, yet will I hope in him."', speaker:'Job', ref:'Job 13:15'},
+      {text:'"The Lord gave and the Lord has taken away; may the name of the Lord be praised."', speaker:'Job', ref:'Job 1:21'},
+      {text:'"Here am I. Send me!"', speaker:'Isaiah', ref:'Isaiah 6:8'}
+    ]},
+  { speaker:'Habakkuk', quote:'"Yet I will rejoice in the Lord, I will be joyful in God my Savior."', ref:'Habakkuk 3:18', difficulty:'hard',
+    wrongSpeakers:['Zephaniah','Micah','Nahum'], wrongQuotes:[
+      {text:'"The righteous person will live by his faithfulness."', speaker:'Habakkuk', ref:'Hab 2:4'},
+      {text:'"He has shown you, O mortal, what is good."', speaker:'Micah', ref:'Micah 6:8'},
+      {text:'"The Lord your God is with you, the Mighty Warrior who saves."', speaker:'Zephaniah', ref:'Zeph 3:17'}
+    ]},
+  { speaker:'Agur', quote:'"Give me neither poverty nor riches, but give me only my daily bread."', ref:'Proverbs 30:8', difficulty:'hard',
+    wrongSpeakers:['Solomon','David','Lemuel'], wrongQuotes:[
+      {text:'"Two are better than one."', speaker:'Solomon', ref:'Eccl 4:9'},
+      {text:'"Trust in the Lord with all your heart."', speaker:'Solomon', ref:'Prov 3:5'},
+      {text:'"The Lord is my shepherd."', speaker:'David', ref:'Psalm 23:1'}
+    ]},
+  { speaker:'Simeon', quote:'"Sovereign Lord, as you have promised, you may now dismiss your servant in peace."', ref:'Luke 2:29', difficulty:'hard',
+    wrongSpeakers:['Zechariah','Joseph','Anna'], wrongQuotes:[
+      {text:'"My soul glorifies the Lord and my spirit rejoices in God my Savior."', speaker:'Mary', ref:'Luke 1:46-47'},
+      {text:'"Why were you searching for me? Didn\'t you know I had to be in my Father\'s house?"', speaker:'Jesus (as child)', ref:'Luke 2:49'},
+      {text:'"Blessed is she who has believed that the Lord would fulfill his promises to her!"', speaker:'Elizabeth', ref:'Luke 1:45'}
+    ]},
+];
+
+// ===================== GREEK/HEBREW DATA =====================
+const GREEK_HEBREW_DATA = [
+  // EASY
+  { word:'ἀγάπη', transliteration:'agapē', language:'Greek', difficulty:'easy',
+    meaning:'Unconditional love', wrongMeanings:['Grace','Faith','Hope'],
+    verseRef:'1 Corinthians 13:13', verseSnippet:'And now these three remain: faith, hope and <span class="highlight">love (ἀγάπη)</span>. But the greatest of these is love.',
+    wrongVerses:[
+      {ref:'Romans 5:1', text:'Therefore, since we have been justified through <span class="highlight">faith (πίστις)</span>, we have peace with God.'},
+      {ref:'Ephesians 2:8', text:'For it is by <span class="highlight">grace (χάρις)</span> you have been saved, through faith.'},
+      {ref:'Romans 8:24', text:'For in this <span class="highlight">hope (ἐλπίς)</span> we were saved. But hope that is seen is no hope at all.'}
+    ]},
+  { word:'πίστις', transliteration:'pistis', language:'Greek', difficulty:'easy',
+    meaning:'Faith / Trust', wrongMeanings:['Love','Grace','Peace'],
+    verseRef:'Hebrews 11:1', verseSnippet:'Now <span class="highlight">faith (πίστις)</span> is confidence in what we hope for and assurance about what we do not see.',
+    wrongVerses:[
+      {ref:'John 3:16', text:'For God so <span class="highlight">loved (ἠγάπησεν)</span> the world that he gave his one and only Son.'},
+      {ref:'Ephesians 2:8', text:'For it is by <span class="highlight">grace (χάρις)</span> you have been saved, through faith.'},
+      {ref:'Romans 5:1', text:'…we have <span class="highlight">peace (εἰρήνη)</span> with God through our Lord Jesus Christ.'}
+    ]},
+  { word:'χάρις', transliteration:'charis', language:'Greek', difficulty:'easy',
+    meaning:'Grace / Favor', wrongMeanings:['Love','Joy','Peace'],
+    verseRef:'Ephesians 2:8', verseSnippet:'For it is by <span class="highlight">grace (χάρις)</span> you have been saved, through faith — and this is not from yourselves.',
+    wrongVerses:[
+      {ref:'1 Cor 13:13', text:'And now these three remain: faith, hope and <span class="highlight">love (ἀγάπη)</span>.'},
+      {ref:'Gal 5:22', text:'But the fruit of the Spirit is <span class="highlight">joy (χαρά)</span>, peace, forbearance, kindness…'},
+      {ref:'John 14:27', text:'<span class="highlight">Peace (εἰρήνη)</span> I leave with you; my peace I give you.'}
+    ]},
+  { word:'שָׁלוֹם', transliteration:'shalom', language:'Hebrew', difficulty:'easy',
+    meaning:'Peace / Wholeness', wrongMeanings:['Love','Strength','Blessing'],
+    verseRef:'Numbers 6:26', verseSnippet:'…the Lord turn his face toward you and give you <span class="highlight">peace (שָׁלוֹם)</span>.',
+    wrongVerses:[
+      {ref:'Deut 6:5', text:'<span class="highlight">Love (אָהַב)</span> the Lord your God with all your heart and with all your soul.'},
+      {ref:'Psalm 46:1', text:'God is our refuge and <span class="highlight">strength (עֹז)</span>, an ever-present help in trouble.'},
+      {ref:'Gen 12:2', text:'I will bless you; I will make your name great, and you will be a <span class="highlight">blessing (בְּרָכָה)</span>.'}
+    ]},
+
+  // MEDIUM
+  { word:'λόγος', transliteration:'logos', language:'Greek', difficulty:'medium',
+    meaning:'Word / Reason', wrongMeanings:['Light','Truth','Spirit'],
+    verseRef:'John 1:1', verseSnippet:'In the beginning was the <span class="highlight">Word (λόγος)</span>, and the Word was with God, and the Word was God.',
+    wrongVerses:[
+      {ref:'1 John 1:5', text:'God is <span class="highlight">light (φῶς)</span>; in him there is no darkness at all.'},
+      {ref:'John 14:6', text:'I am the way and the <span class="highlight">truth (ἀλήθεια)</span> and the life.'},
+      {ref:'John 4:24', text:'God is <span class="highlight">spirit (πνεῦμα)</span>, and his worshipers must worship in the Spirit and in truth.'}
+    ]},
+  { word:'πνεῦμα', transliteration:'pneuma', language:'Greek', difficulty:'medium',
+    meaning:'Spirit / Breath / Wind', wrongMeanings:['Soul','Mind','Body'],
+    verseRef:'John 4:24', verseSnippet:'God is <span class="highlight">spirit (πνεῦμα)</span>, and his worshipers must worship in the Spirit and in truth.',
+    wrongVerses:[
+      {ref:'Matt 10:28', text:'Rather, be afraid of the One who can destroy both <span class="highlight">soul (ψυχή)</span> and body in hell.'},
+      {ref:'Romans 7:25', text:'So then, I myself in my <span class="highlight">mind (νοῦς)</span> am a slave to God\'s law.'},
+      {ref:'1 Cor 6:20', text:'…honor God with your <span class="highlight">body (σῶμα)</span>.'}
+    ]},
+  { word:'חֶסֶד', transliteration:'hesed', language:'Hebrew', difficulty:'medium',
+    meaning:'Steadfast love / Lovingkindness', wrongMeanings:['Justice','Holiness','Wisdom'],
+    verseRef:'Psalm 136:1', verseSnippet:'Give thanks to the Lord, for he is good. His <span class="highlight">love (חֶסֶד)</span> endures forever.',
+    wrongVerses:[
+      {ref:'Amos 5:24', text:'Let <span class="highlight">justice (מִשְׁפָּט)</span> roll on like a river, righteousness like a never-failing stream!'},
+      {ref:'Isaiah 6:3', text:'Holy, <span class="highlight">holy (קָדוֹשׁ)</span>, holy is the Lord Almighty; the whole earth is full of his glory.'},
+      {ref:'Prov 9:10', text:'The fear of the Lord is the beginning of <span class="highlight">wisdom (חָכְמָה)</span>.'}
+    ]},
+  { word:'בְּרִית', transliteration:'berith', language:'Hebrew', difficulty:'medium',
+    meaning:'Covenant / Agreement', wrongMeanings:['Promise','Law','Sacrifice'],
+    verseRef:'Genesis 9:13', verseSnippet:'I have set my rainbow in the clouds, and it will be the sign of the <span class="highlight">covenant (בְּרִית)</span> between me and the earth.',
+    wrongVerses:[
+      {ref:'Gen 12:1', text:'The Lord had said to Abram, "Go from your country… to the land I will show you. I will make you into a great nation and I will bless you."'},
+      {ref:'Lev 26:46', text:'These are the decrees, the <span class="highlight">laws (תּוֹרָה)</span> and regulations that the Lord established…'},
+      {ref:'Gen 22:2', text:'Take your son… and <span class="highlight">sacrifice (עָלָה)</span> him there as a burnt offering on a mountain I will show you.'}
+    ]},
+
+  // HARD
+  { word:'σωτηρία', transliteration:'sōtēria', language:'Greek', difficulty:'hard',
+    meaning:'Salvation / Deliverance', wrongMeanings:['Righteousness','Sanctification','Redemption'],
+    verseRef:'Romans 1:16', verseSnippet:'For I am not ashamed of the gospel, because it is the power of God that brings <span class="highlight">salvation (σωτηρία)</span> to everyone who believes.',
+    wrongVerses:[
+      {ref:'Romans 3:22', text:'This <span class="highlight">righteousness (δικαιοσύνη)</span> is given through faith in Jesus Christ to all who believe.'},
+      {ref:'1 Thess 4:3', text:'It is God\'s will that you should be <span class="highlight">sanctified (ἁγιασμός)</span>.'},
+      {ref:'Ephesians 1:7', text:'In him we have <span class="highlight">redemption (ἀπολύτρωσις)</span> through his blood, the forgiveness of sins.'}
+    ]},
+  { word:'קָדוֹשׁ', transliteration:'qadosh', language:'Hebrew', difficulty:'hard',
+    meaning:'Holy / Set apart', wrongMeanings:['Righteous','Faithful','Eternal'],
+    verseRef:'Isaiah 6:3', verseSnippet:'And they were calling to one another: "<span class="highlight">Holy (קָדוֹשׁ)</span>, holy, holy is the Lord Almighty; the whole earth is full of his glory."',
+    wrongVerses:[
+      {ref:'Psalm 11:7', text:'For the Lord is <span class="highlight">righteous (צַדִּיק)</span>, he loves justice; the upright will see his face.'},
+      {ref:'Deut 7:9', text:'Know therefore that the Lord your God is God; he is the <span class="highlight">faithful (נֶאֱמָן)</span> God.'},
+      {ref:'Psalm 90:2', text:'From <span class="highlight">everlasting (עוֹלָם)</span> to everlasting you are God.'}
+    ]},
+  { word:'ἐκκλησία', transliteration:'ekklēsia', language:'Greek', difficulty:'hard',
+    meaning:'Assembly / Church', wrongMeanings:['Kingdom','Temple','Fellowship'],
+    verseRef:'Matthew 16:18', verseSnippet:'"…and on this rock I will build my <span class="highlight">church (ἐκκλησία)</span>, and the gates of Hades will not overcome it."',
+    wrongVerses:[
+      {ref:'Matt 6:33', text:'But seek first his <span class="highlight">kingdom (βασιλεία)</span> and his righteousness.'},
+      {ref:'1 Cor 3:16', text:'Don\'t you know that you yourselves are God\'s <span class="highlight">temple (ναός)</span>?'},
+      {ref:'1 John 1:3', text:'…so that you also may have <span class="highlight">fellowship (κοινωνία)</span> with us.'}
+    ]},
+  { word:'צֶדֶק', transliteration:'tsedeq', language:'Hebrew', difficulty:'hard',
+    meaning:'Righteousness / Justice', wrongMeanings:['Truth','Mercy','Wisdom'],
+    verseRef:'Amos 5:24', verseSnippet:'But let justice roll on like a river, <span class="highlight">righteousness (צֶדֶק)</span> like a never-failing stream!',
+    wrongVerses:[
+      {ref:'Psalm 25:5', text:'Guide me in your <span class="highlight">truth (אֱמֶת)</span> and teach me, for you are God my Savior.'},
+      {ref:'Micah 6:8', text:'…to love <span class="highlight">mercy (חֶסֶד)</span> and to walk humbly with your God.'},
+      {ref:'Prov 9:10', text:'The fear of the Lord is the beginning of <span class="highlight">wisdom (חָכְמָה)</span>.'}
+    ]},
+];
+
+// ===================== WHAT IS IT ABOUT DATA =====================
+const WHAT_IS_IT_ABOUT_DATA = [
+  // EASY
+  { ref:'John 3:16', difficulty:'easy', context:'New Testament, Gospel of John',
+    correct:"God's love for humanity — giving his Son so that all who believe would have eternal life.",
+    wrong:["God creating the heavens and the earth in the beginning.", "The Ten Commandments given on Mount Sinai."]},
+  { ref:'Psalm 23', difficulty:'easy', context:'Old Testament, Book of Psalms',
+    correct:"The Lord as a shepherd who guides, protects, and provides for his people.",
+    wrong:["The construction of Solomon's Temple in Jerusalem.", "The Israelites crossing the Red Sea to escape Egypt."]},
+  { ref:'Genesis 1:1', difficulty:'easy', context:'Old Testament, Book of Genesis',
+    correct:"The very beginning of creation — God creating the heavens and the earth.",
+    wrong:["Noah building the ark and the coming of the great flood.", "Abraham receiving the covenant promise from God."]},
+  { ref:'Romans 8:28', difficulty:'easy', context:'New Testament, Epistle to the Romans',
+    correct:"The assurance that God works all things together for good for those who love him.",
+    wrong:["Instructions on how to perform water baptism properly.", "A list of spiritual gifts given to the church."]},
+  { ref:'Philippians 4:13', difficulty:'easy', context:'New Testament, Epistle to Philippians',
+    correct:"Paul's declaration that he can face any situation through the strength Christ provides.",
+    wrong:["Jesus healing a paralyzed man by the pool of Bethesda.", "Moses striking the rock to bring forth water."]},
+  { ref:'Proverbs 3:5-6', difficulty:'easy', context:'Old Testament, Book of Proverbs',
+    correct:"The call to trust God completely rather than relying on one's own understanding.",
+    wrong:["Instructions for daily prayer and fasting in the temple.", "A description of the ideal wise ruler of Israel."]},
+
+  // MEDIUM
+  { ref:'Isaiah 53:5', difficulty:'medium', context:'Old Testament, Book of Isaiah',
+    correct:"A prophecy about a Suffering Servant pierced for our transgressions — seen as pointing to Jesus.",
+    wrong:["King Hezekiah's miraculous recovery from a terminal illness.", "The fall of Babylon described as God's judgment on wickedness."]},
+  { ref:'Hebrews 11:1', difficulty:'medium', context:'New Testament, Epistle to the Hebrews',
+    correct:"A definition of faith as confidence in things hoped for and assurance about what is unseen.",
+    wrong:["The requirements for becoming a high priest in the Levitical order.", "Instructions for observing the Feast of Tabernacles."]},
+  { ref:'Jeremiah 29:11', difficulty:'medium', context:'Old Testament, Book of Jeremiah',
+    correct:"God's promise of a future and a hope — words spoken to Israel during their Babylonian exile.",
+    wrong:["God's command to Jeremiah to remain unmarried as a sign to the nation.", "A vision of a valley of dry bones coming back to life."]},
+  { ref:'Galatians 5:22-23', difficulty:'medium', context:'New Testament, Epistle to Galatians',
+    correct:"The fruit of the Spirit — qualities like love, joy, peace, and patience that the Spirit produces in believers.",
+    wrong:["The gifts of the Spirit listed for use in public worship and prophecy.", "Paul defending his apostolic authority against false teachers."]},
+  { ref:'Revelation 21:4', difficulty:'medium', context:'New Testament, Book of Revelation',
+    correct:"A vision of the new creation where God wipes away every tear and death and suffering are no more.",
+    wrong:["The opening of the seven seals and the four horsemen of the apocalypse.", "The judgment of Babylon, the great harlot city."]},
+  { ref:'Luke 15:11-32', difficulty:'medium', context:'New Testament, Gospel of Luke',
+    correct:"The parable of the Prodigal Son — a wayward son returns home and is joyfully welcomed by his father.",
+    wrong:["The miraculous feeding of five thousand people with five loaves and two fish.", "Jesus walking on water toward the disciples in a storm."]},
+
+  // HARD
+  { ref:'Romans 9:15', difficulty:'hard', context:'New Testament, Epistle to the Romans',
+    correct:"God's sovereign mercy — his freedom to have mercy and compassion on whomever he chooses.",
+    wrong:["Paul's personal struggle with sin described as a war between his flesh and the Spirit.", "The spiritual armor believers must wear to stand against the enemy."]},
+  { ref:'Ezekiel 37:1-14', difficulty:'hard', context:'Old Testament, Book of Ezekiel',
+    correct:"The Valley of Dry Bones — a vision of Israel's national restoration symbolized by bones coming to life.",
+    wrong:["The prophet's vision of the merkavah: four living creatures and wheels within wheels.", "A detailed blueprint for a new Temple revealed to Ezekiel in exile."]},
+  { ref:'Colossians 1:15-20', difficulty:'hard', context:'New Testament, Epistle to Colossians',
+    correct:"A majestic hymn declaring Christ as the image of God, firstborn of all creation, and head of the church.",
+    wrong:["Paul's instructions on household relationships: husbands, wives, children, and servants.", "A warning against the empty philosophies and human traditions corrupting the Colossian church."]},
+  { ref:'Habakkuk 2:4', difficulty:'hard', context:'Old Testament, Book of Habakkuk',
+    correct:"The righteous shall live by their faith — a pivotal statement quoted three times in the New Testament.",
+    wrong:["God's command to write the vision on tablets and wait for its appointed fulfillment time.", "Habakkuk's lament about God allowing wicked Babylon to punish even more wicked Israel."]},
+  { ref:'Acts 2:1-4', difficulty:'hard', context:'New Testament, Book of Acts',
+    correct:"The Day of Pentecost — the Holy Spirit descends as tongues of fire and the disciples speak in other languages.",
+    wrong:["Peter and John healing a man crippled from birth at the temple gate called Beautiful.", "Stephen's speech before the Sanhedrin recounting Israel's history before his stoning."]},
+  { ref:'Psalm 22:1', difficulty:'hard', context:'Old Testament, Book of Psalms',
+    correct:"A cry of desolation — 'My God, my God, why have you forsaken me?' — later quoted by Jesus on the cross.",
+    wrong:["A royal coronation psalm celebrating the anointing of a new king in Zion.", "A psalm of ascent sung by pilgrims traveling up to Jerusalem for the festivals."]},
+];
+
+// ===================== WHO SAID IT GAME =====================
+function initWSI() {
+  const diff = state.selectedWSIStyle === 'quote2speaker' ? state.selectedWSIDiff : state.selectedWSIDiff;
+  const pool = WHO_SAID_IT_DATA.filter(e => e.difficulty === state.selectedWSIDiff);
+  const entry = pool[Math.floor(Math.random() * pool.length)];
+  state.wsi.entry = entry;
+  state.wsi.answered = false;
+  renderWSI();
+}
+
+function renderWSI() {
+  const { entry } = state.wsi;
+  const style = state.selectedWSIStyle;
+  const gc = document.getElementById('game-content');
+  if (style === 'quote2speaker') {
+    // Show quote → pick speaker
+    const options = shuffleArray([entry.speaker, ...entry.wrongSpeakers]);
+    gc.innerHTML = `
+      <div class="question-label">Who said this?</div>
+      <div class="quote-card">
+        <div class="quote-text">${escHtml(entry.quote)}</div>
+        <div class="quote-ref">${escHtml(entry.ref)}</div>
+      </div>
+      <div class="options-grid">
+        ${options.map((sp, i) => `
+          <button class="option-btn" id="wsi-opt-${i}" onclick="answerWSI(this,'${escAttr(sp)}','${escAttr(entry.speaker)}')">
+            <span class="opt-letter">${String.fromCharCode(65+i)}</span>
+            <span>${escHtml(sp)}</span>
+          </button>`).join('')}
+      </div>`;
+  } else {
+    // Show speaker → pick correct quote
+    const correctQ = { text: entry.quote, speaker: entry.speaker, ref: entry.ref };
+    const wrongQs = entry.wrongQuotes.slice(0, 3);
+    const allOpts = shuffleArray([correctQ, ...wrongQs]);
+    gc.innerHTML = `
+      <div class="question-label">Which quote did <span style="color:var(--gold-light)">${escHtml(entry.speaker)}</span> say?</div>
+      <div class="speaker-badge"><i class="fa-solid fa-user"></i> ${escHtml(entry.speaker)}</div>
+      <div class="options-grid">
+        ${allOpts.map((q, i) => `
+          <button class="option-btn" id="wsi-qopt-${i}" onclick="answerWSIQuote(this,'${escAttr(q.text)}','${escAttr(entry.quote)}')">
+            <span class="opt-letter">${String.fromCharCode(65+i)}</span>
+            <span style="font-family:var(--font-verse);font-style:italic">${escHtml(q.text)}</span>
+          </button>`).join('')}
+      </div>`;
+  }
+}
+
+function answerWSI(btn, chosen, correct) {
+  if (state.wsi.answered) return;
+  state.wsi.answered = true;
+  const isCorrect = chosen === correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.querySelector('span:last-child')?.textContent === correct) b.classList.add('correct');
+    });
+  }
+  _finishWSI(isCorrect);
+}
+
+function answerWSIQuote(btn, chosen, correct) {
+  if (state.wsi.answered) return;
+  state.wsi.answered = true;
+  const isCorrect = chosen === correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      const txt = b.querySelector('span:last-child')?.textContent?.trim();
+      if (txt && correct.includes(txt.slice(0,20))) b.classList.add('correct');
+    });
+  }
+  _finishWSI(isCorrect);
+}
+
+function _finishWSI(isCorrect) {
+  const xpMap = { easy: 15, medium: 25, hard: 40 };
+  const xp = isCorrect ? (xpMap[state.selectedWSIDiff] || 20) : 0;
+  state.roundXP = xp;
+  state.roundBreakdown = isCorrect ? [{ label: 'Correct answer', xp }] : [{ label: 'Incorrect', xp: 0 }];
+  if (isCorrect) { state.correctAnswers++; state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else state.streak = 0;
+  state.totalAnswers++; state.gamesPlayed++;
+  state.currentData = { book: state.wsi.entry.ref, chapter: '', verse: '', verse_text: state.wsi.entry.quote };
+  showFeedback(isCorrect); addXP(xp);
+  setTimeout(() => showWSIResults(), 1400);
+}
+
+function showWSIResults() {
+  showScreen('results');
+  const entry = state.wsi.entry;
+  const ok = state.roundXP > 0;
+  document.getElementById('results-icon').textContent = ok ? '🗣️' : '📚';
+  document.getElementById('results-title').textContent = ok ? 'Well Said!' : 'Keep Studying!';
+  document.getElementById('results-sub').textContent = entry.ref;
+  document.getElementById('results-breakdown').innerHTML = `
+    <div class="result-row"><span class="result-label">Speaker</span><span class="result-value correct">${escHtml(entry.speaker)}</span></div>
+    <div class="result-row"><span class="result-label">Reference</span><span class="result-value" style="color:var(--gold)">${escHtml(entry.ref)}</span></div>
+    <div class="quote-card" style="margin:8px 0"><div class="quote-text">${escHtml(entry.quote)}</div></div>`;
+  document.getElementById('results-xp').innerHTML = `<div class="xp-breakdown">
+    ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+    <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+  </div>`;
+}
+
+// ===================== GREEK/HEBREW GAME =====================
+function initGH() {
+  const pool = GREEK_HEBREW_DATA.filter(e => e.difficulty === state.selectedGHDiff);
+  const entry = pool[Math.floor(Math.random() * pool.length)];
+  state.gh.entry = entry;
+  state.gh.phase = 1;
+  state.gh.answered = false;
+  state.gh.part1Correct = false;
+  renderGHPhase1();
+}
+
+function renderGHPhase1() {
+  const { entry } = state.gh;
+  const opts = shuffleArray([entry.meaning, ...entry.wrongMeanings]);
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="part-indicator"><span class="part-num">Part 1 of 2</span><span>Translation</span></div>
+    <div class="word-display">
+      <div class="word-original">${entry.word}</div>
+      <div class="word-transliteration">${entry.transliteration}</div>
+      <div class="word-language">${entry.language}</div>
+    </div>
+    <div class="question-label">What does this word mean?</div>
+    <div class="options-grid">
+      ${opts.map((m, i) => `
+        <button class="option-btn" id="gh-opt-${i}" onclick="answerGH1(this,'${escAttr(m)}','${escAttr(entry.meaning)}')">
+          <span class="opt-letter">${String.fromCharCode(65+i)}</span>
+          <span>${escHtml(m)}</span>
+        </button>`).join('')}
+    </div>`;
+}
+
+function answerGH1(btn, chosen, correct) {
+  if (state.gh.answered) return;
+  state.gh.answered = true;
+  const isCorrect = chosen === correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.querySelector('span:last-child')?.textContent === correct) b.classList.add('correct');
+    });
+  }
+  state.gh.part1Correct = isCorrect;
+  setTimeout(() => { state.gh.answered = false; renderGHPhase2(); }, 1000);
+}
+
+function renderGHPhase2() {
+  const { entry } = state.gh;
+  const correctOpt = { ref: entry.verseRef, snippet: entry.verseSnippet };
+  const wrongOpts = entry.wrongVerses.slice(0, 3);
+  const allOpts = shuffleArray([correctOpt, ...wrongOpts]);
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="part-indicator"><span class="part-num">Part 2 of 2</span><span>Where is it used?</span></div>
+    <div class="word-display">
+      <div class="word-original">${entry.word}</div>
+      <div class="word-transliteration">${entry.transliteration}</div>
+      <div class="word-language">${entry.language}</div>
+    </div>
+    <div class="question-label">Which verse uses <em>${entry.word}</em>?</div>
+    <div class="options-grid">
+      ${allOpts.map((opt, i) => `
+        <button class="option-btn" id="gh-vopt-${i}" onclick="answerGH2(this,'${escAttr(opt.ref)}','${escAttr(entry.verseRef)}')">
+          <span class="opt-letter">${String.fromCharCode(65+i)}</span>
+          <div>
+            <div class="verse-snippet-ref">${escHtml(opt.ref)}</div>
+            <div class="verse-snippet">${opt.snippet}</div>
+          </div>
+        </button>`).join('')}
+    </div>`;
+}
+
+function answerGH2(btn, chosen, correct) {
+  if (state.gh.answered) return;
+  state.gh.answered = true;
+  const isCorrect = chosen === correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.querySelector('.verse-snippet-ref')?.textContent === correct) b.classList.add('correct');
+    });
+  }
+  const xpMap = { easy: 20, medium: 35, hard: 55 };
+  const base = xpMap[state.selectedGHDiff] || 25;
+  const xp = (state.gh.part1Correct ? base : 0) + (isCorrect ? base : 0);
+  state.roundXP = xp;
+  state.roundBreakdown = [
+    { label: 'Part 1 – Translation', xp: state.gh.part1Correct ? base : 0 },
+    { label: 'Part 2 – Verse location', xp: isCorrect ? base : 0 }
+  ];
+  if (isCorrect || state.gh.part1Correct) { state.correctAnswers++; state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else state.streak = 0;
+  state.totalAnswers++; state.gamesPlayed++;
+  state.currentData = { book: state.gh.entry.verseRef, chapter: '', verse: '', verse_text: '' };
+  addXP(xp);
+  setTimeout(() => showGHResults(), 1400);
+}
+
+function showGHResults() {
+  showScreen('results');
+  const entry = state.gh.entry;
+  const ok = state.roundXP > 0;
+  document.getElementById('results-icon').textContent = ok ? '📜' : '📚';
+  document.getElementById('results-title').textContent = ok ? 'Well Studied!' : 'Keep Digging!';
+  document.getElementById('results-sub').textContent = entry.word + ' — ' + entry.transliteration;
+  document.getElementById('results-breakdown').innerHTML = `
+    <div class="result-row"><span class="result-label">Word</span><span class="result-value" style="font-size:18px;color:var(--gold-light)">${entry.word}</span></div>
+    <div class="result-row"><span class="result-label">Language</span><span class="result-value" style="color:var(--gold)">${entry.language}</span></div>
+    <div class="result-row"><span class="result-label">Meaning</span><span class="result-value correct">${escHtml(entry.meaning)}</span></div>
+    <div class="result-row"><span class="result-label">Key Verse</span><span class="result-value" style="color:var(--gold);font-size:12px">${escHtml(entry.verseRef)}</span></div>
+    <div style="margin-top:10px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-sm);font-family:var(--font-verse);font-size:14px;line-height:1.6">${entry.verseSnippet}</div>`;
+  document.getElementById('results-xp').innerHTML = `<div class="xp-breakdown">
+    ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+    <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+  </div>`;
+}
+
+// ===================== ORDER THE BOOKS GAME =====================
+let _obDrag = { source: null };
+
+function initOB() {
+  const diff = state.selectedOBDiff;
+  const allBooks = [...OT_BOOKS, ...NT_BOOKS];
+  let count = diff === 'easy' ? 5 : diff === 'medium' ? 8 : 12;
+  // Pick a random consecutive slice from OT or NT
+  let useAll = diff === 'hard';
+  let pool = useAll ? allBooks : (Math.random() > 0.5 ? OT_BOOKS : NT_BOOKS);
+  const maxStart = pool.length - count;
+  const start = Math.floor(Math.random() * (maxStart + 1));
+  const books = pool.slice(start, start + count);
+  state.ob.books = books;
+  state.ob.answer = [];
+  state.ob.finished = false;
+  state.ob.checked = false;
+  renderOB();
+}
+
+function renderOB() {
+  const gc = document.getElementById('game-content');
+  const shuffled = shuffleArray([...state.ob.books]);
+  state.ob.shuffledBank = shuffled.filter(b => !state.ob.answer.includes(b));
+  const answerHtml = state.ob.answer.map((b, i) => `
+    <div class="book-chip in-answer" draggable="true"
+      data-book="${escAttr(b)}" data-zone="answer" data-idx="${i}"
+      ondragstart="obDragStart(event,this)" ondragover="obDragOver(event,this)" ondragleave="obDragLeave(event,this)" ondrop="obDrop(event,this)">
+      <span>${escHtml(b)}</span>
+      <span class="book-chip-x" onclick="obRemoveBook('${escAttr(b)}')">×</span>
+    </div>`).join('');
+  const bankHtml = state.ob.shuffledBank.map(b => `
+    <div class="book-chip" draggable="true"
+      data-book="${escAttr(b)}" data-zone="bank"
+      ondragstart="obDragStart(event,this)" ondragover="obDragOver(event,this)" ondragleave="obDragLeave(event,this)" ondrop="obDrop(event,this)"
+      onclick="obAddBook('${escAttr(b)}')">
+      ${escHtml(b)}
+    </div>`).join('');
+  gc.innerHTML = `
+    <div class="question-label">Place the books in canonical order</div>
+    <div class="question-sub">Drag or tap books into the correct sequence</div>
+    <div class="books-controls">
+      <span class="books-count">${state.ob.answer.length} / ${state.ob.books.length} placed</span>
+      <button class="btn btn-secondary btn-sm" style="padding:6px 12px;font-size:12px" onclick="obClearAll()">Clear All</button>
+    </div>
+    <div class="books-answer-zone ${state.ob.answer.length ? 'has-books' : ''}" id="ob-answer-zone"
+      ondragover="obZoneDragOver(event)" ondragleave="obZoneDragLeave(event)" ondrop="obZoneDrop(event)">
+      ${state.ob.answer.length === 0 ? '<div class="zone-placeholder">← Drop books here in order</div>' : ''}
+      ${answerHtml}
+    </div>
+    <div class="section-label" style="margin:4px 0">Available Books</div>
+    <div class="books-bank" id="ob-bank"
+      ondragover="obBankDragOver(event)" ondragleave="obBankDragLeave(event)" ondrop="obBankDrop(event)">
+      ${bankHtml}
+    </div>
+    <div style="margin-top:16px">
+      <button class="check-order-btn btn-full" onclick="obCheck()" ${state.ob.answer.length === state.ob.books.length ? '' : 'disabled'}>
+        <i class="fa-solid fa-check"></i> Check Order
+      </button>
+    </div>`;
+  // Touch support
+  document.querySelectorAll('.book-chip').forEach(chip => {
+    chip.addEventListener('touchstart', obTouchStart, { passive: false });
+    chip.addEventListener('touchmove', obTouchMove, { passive: false });
+    chip.addEventListener('touchend', obTouchEnd, { passive: false });
+  });
+}
+
+function obAddBook(book) {
+  if (state.ob.answer.includes(book)) return;
+  state.ob.answer.push(book);
+  renderOB();
+}
+
+function obRemoveBook(book) {
+  state.ob.answer = state.ob.answer.filter(b => b !== book);
+  renderOB();
+}
+
+function obClearAll() {
+  state.ob.answer = [];
+  renderOB();
+}
+
+// Drag & Drop for OB
+function obDragStart(e, el) {
+  _obDrag.source = el;
+  _obDrag.sourceBook = el.dataset.book;
+  _obDrag.sourceZone = el.dataset.zone;
+  _obDrag.sourceIdx = parseInt(el.dataset.idx ?? '-1');
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => el.classList.add('dragging-ghost'), 0);
+}
+function obDragOver(e, el) {
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.book-chip.drag-over').forEach(c => c.classList.remove('drag-over'));
+  el.classList.add('drag-over');
+}
+function obDragLeave(e, el) { el.classList.remove('drag-over'); }
+function obZoneDragOver(e) { e.preventDefault(); document.getElementById('ob-answer-zone').classList.add('drop-active'); }
+function obZoneDragLeave(e) { document.getElementById('ob-answer-zone').classList.remove('drop-active'); }
+function obBankDragOver(e) { e.preventDefault(); document.getElementById('ob-bank').classList.add('drop-active'); }
+function obBankDragLeave(e) { document.getElementById('ob-bank').classList.remove('drop-active'); }
+
+function obZoneDrop(e) {
+  e.preventDefault();
+  document.getElementById('ob-answer-zone').classList.remove('drop-active');
+  if (_obDrag.sourceZone === 'bank') {
+    obAddBook(_obDrag.sourceBook);
+  }
+  if (_obDrag.source) _obDrag.source.classList.remove('dragging-ghost');
+  _obDrag = { source: null };
+}
+
+function obBankDrop(e) {
+  e.preventDefault();
+  document.getElementById('ob-bank').classList.remove('drop-active');
+  if (_obDrag.sourceZone === 'answer') {
+    obRemoveBook(_obDrag.sourceBook);
+  }
+  if (_obDrag.source) _obDrag.source.classList.remove('dragging-ghost');
+  _obDrag = { source: null };
+}
+
+function obDrop(e, targetEl) {
+  e.preventDefault(); e.stopPropagation();
+  document.querySelectorAll('.book-chip.drag-over').forEach(c => c.classList.remove('drag-over'));
+  const src = _obDrag.sourceBook;
+  const tgt = targetEl.dataset.book;
+  if (src === tgt) { if (_obDrag.source) _obDrag.source.classList.remove('dragging-ghost'); _obDrag = { source: null }; return; }
+  if (_obDrag.sourceZone === 'answer' && targetEl.dataset.zone === 'answer') {
+    // Reorder within answer zone
+    const srcIdx = state.ob.answer.indexOf(src);
+    const tgtIdx = state.ob.answer.indexOf(tgt);
+    if (srcIdx !== -1 && tgtIdx !== -1) {
+      state.ob.answer.splice(srcIdx, 1);
+      state.ob.answer.splice(tgtIdx, 0, src);
+    }
+  } else if (_obDrag.sourceZone === 'bank' && targetEl.dataset.zone === 'answer') {
+    const tgtIdx = state.ob.answer.indexOf(tgt);
+    if (!state.ob.answer.includes(src)) state.ob.answer.splice(tgtIdx, 0, src);
+  } else if (_obDrag.sourceZone === 'answer' && targetEl.dataset.zone === 'bank') {
+    obRemoveBook(src);
+  }
+  if (_obDrag.source) _obDrag.source.classList.remove('dragging-ghost');
+  _obDrag = { source: null };
+  renderOB();
+}
+
+// Touch DnD for OB
+let _obTouch = { active: false, el: null, clone: null, startX: 0, startY: 0, book: null, zone: null };
+function obTouchStart(e) {
+  const el = e.currentTarget;
+  _obTouch.active = true; _obTouch.el = el;
+  _obTouch.book = el.dataset.book; _obTouch.zone = el.dataset.zone;
+  _obTouch.startX = e.touches[0].clientX; _obTouch.startY = e.touches[0].clientY;
+  const clone = el.cloneNode(true);
+  clone.style.cssText = `position:fixed;z-index:9999;opacity:.85;pointer-events:none;transform:scale(1.05);transition:none;`;
+  const r = el.getBoundingClientRect();
+  clone.style.left = r.left + 'px'; clone.style.top = r.top + 'px';
+  document.body.appendChild(clone);
+  _obTouch.clone = clone;
+  e.preventDefault();
+}
+function obTouchMove(e) {
+  if (!_obTouch.active) return;
+  const t = e.touches[0];
+  const r = _obTouch.el.getBoundingClientRect();
+  _obTouch.clone.style.left = (r.left + t.clientX - _obTouch.startX) + 'px';
+  _obTouch.clone.style.top = (r.top + t.clientY - _obTouch.startY) + 'px';
+  e.preventDefault();
+}
+function obTouchEnd(e) {
+  if (!_obTouch.active) return;
+  const t = e.changedTouches[0];
+  if (_obTouch.clone) { _obTouch.clone.remove(); _obTouch.clone = null; }
+  const zone = document.getElementById('ob-answer-zone');
+  const bank = document.getElementById('ob-bank');
+  const r1 = zone.getBoundingClientRect(), r2 = bank.getBoundingClientRect();
+  const x = t.clientX, y = t.clientY;
+  if (x >= r1.left && x <= r1.right && y >= r1.top && y <= r1.bottom) {
+    if (_obTouch.zone === 'bank') obAddBook(_obTouch.book);
+  } else if (x >= r2.left && x <= r2.right && y >= r2.top && y <= r2.bottom) {
+    if (_obTouch.zone === 'answer') obRemoveBook(_obTouch.book);
+  }
+  _obTouch = { active: false, el: null, clone: null, startX: 0, startY: 0, book: null, zone: null };
+}
+
+function obCheck() {
+  const correct = state.ob.books;
+  const answer = state.ob.answer;
+  const allCorrect = correct.every((b, i) => answer[i] === b);
+  const xpMap = { easy: 20, medium: 40, hard: 70 };
+  const base = xpMap[state.selectedOBDiff] || 30;
+  const correctCount = answer.filter((b, i) => b === correct[i]).length;
+  const xp = allCorrect ? base : Math.round(base * correctCount / correct.length * 0.6);
+  state.roundXP = xp;
+  state.roundBreakdown = [
+    { label: `${correctCount}/${correct.length} in correct position`, xp }
+  ];
+  if (allCorrect) { state.correctAnswers++; state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else state.streak = 0;
+  state.totalAnswers++; state.gamesPlayed++;
+  state.currentData = { book: 'Bible', chapter: '', verse: '', verse_text: '' };
+  addXP(xp);
+  // Show inline result before going to results screen
+  const gc = document.getElementById('game-content');
+  const rows = answer.map((b, i) => {
+    const ok = b === correct[i];
+    return `<div class="order-result-row ${ok ? 'ok' : 'bad'}">
+      <span>${ok ? '✓' : '✗'}</span>
+      <span style="font-weight:700">${i+1}.</span>
+      <span>${escHtml(b)}</span>
+      ${!ok ? `<span style="opacity:.6;font-size:11px">→ should be ${escHtml(correct[i])}</span>` : ''}
+    </div>`;
+  }).join('');
+  const resultDiv = document.createElement('div');
+  resultDiv.style.cssText = 'margin-top:16px;animation:slideDown .3s ease';
+  resultDiv.innerHTML = `<div class="question-label" style="color:${allCorrect ? 'var(--success)' : 'var(--error)'}">
+    ${allCorrect ? '🏆 Perfect Order!' : `${correctCount}/${correct.length} correct`}
+  </div>${rows}`;
+  gc.appendChild(resultDiv);
+  setTimeout(() => showOBResults(allCorrect, correct), 2200);
+}
+
+function showOBResults(allCorrect, correct) {
+  showScreen('results');
+  document.getElementById('results-icon').textContent = allCorrect ? '📚' : '🔢';
+  document.getElementById('results-title').textContent = allCorrect ? 'Perfect Order!' : 'Keep Memorizing!';
+  document.getElementById('results-sub').textContent = 'Books of the Bible';
+  document.getElementById('results-breakdown').innerHTML = `
+    <div class="result-row"><span class="result-label">Correct Order</span><span class="result-value correct"></span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:10px 0">
+      ${correct.map((b, i) => `<div style="font-size:12px;padding:4px 8px;border-radius:4px;background:var(--bg-secondary);color:var(--text-secondary)"><span style="color:var(--gold-dim);font-weight:700">${i+1}. </span>${escHtml(b)}</div>`).join('')}
+    </div>`;
+  document.getElementById('results-xp').innerHTML = `<div class="xp-breakdown">
+    ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+    <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+  </div>`;
+}
+
+// ===================== WHAT IS IT ABOUT GAME =====================
+function initWIIA() {
+  const pool = WHAT_IS_IT_ABOUT_DATA.filter(e => e.difficulty === state.selectedWIIADiff);
+  const entry = pool[Math.floor(Math.random() * pool.length)];
+  state.wiia.entry = entry;
+  state.wiia.answered = false;
+  renderWIIA();
+}
+
+function renderWIIA() {
+  const { entry } = state.wiia;
+  const opts = shuffleArray([{ text: entry.correct, isCorrect: true }, ...entry.wrong.map(w => ({ text: w, isCorrect: false }))]);
+  const gc = document.getElementById('game-content');
+  gc.innerHTML = `
+    <div class="question-label">What is this passage about?</div>
+    <div class="ref-display">
+      <div class="ref-main">${escHtml(entry.ref)}</div>
+      <div class="ref-context">${escHtml(entry.context)}</div>
+    </div>
+    <div style="margin-top:4px">
+      ${opts.map((opt, i) => `
+        <div class="desc-option" id="wiia-opt-${i}" onclick="answerWIIA(this,${opt.isCorrect})">
+          <span style="font-family:var(--font-display);font-size:12px;color:var(--gold-dim);margin-right:8px;font-weight:700">${String.fromCharCode(65+i)}.</span>
+          ${escHtml(opt.text)}
+        </div>`).join('')}
+    </div>`;
+}
+
+function answerWIIA(btn, isCorrect) {
+  if (state.wiia.answered) return;
+  state.wiia.answered = true;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    document.querySelectorAll('.desc-option').forEach(b => {
+      if (b.textContent.trim().slice(2).trim().startsWith(state.wiia.entry.correct.slice(0, 15)))
+        b.classList.add('correct');
+    });
+  }
+  const xpMap = { easy: 15, medium: 25, hard: 40 };
+  const xp = isCorrect ? (xpMap[state.selectedWIIADiff] || 20) : 0;
+  state.roundXP = xp;
+  state.roundBreakdown = isCorrect ? [{ label: 'Correct!', xp }] : [{ label: 'Incorrect', xp: 0 }];
+  if (isCorrect) { state.correctAnswers++; state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else state.streak = 0;
+  state.totalAnswers++; state.gamesPlayed++;
+  state.currentData = { book: state.wiia.entry.ref, chapter: '', verse: '', verse_text: state.wiia.entry.correct };
+  showFeedback(isCorrect); addXP(xp);
+  setTimeout(() => showWIIAResults(), 1400);
+}
+
+function showWIIAResults() {
+  showScreen('results');
+  const entry = state.wiia.entry;
+  const ok = state.roundXP > 0;
+  document.getElementById('results-icon').textContent = ok ? '✨' : '📖';
+  document.getElementById('results-title').textContent = ok ? 'Insightful!' : 'Keep Reading!';
+  document.getElementById('results-sub').textContent = entry.ref;
+  document.getElementById('results-breakdown').innerHTML = `
+    <div class="result-row"><span class="result-label">Reference</span><span class="result-value" style="color:var(--gold)">${escHtml(entry.ref)}</span></div>
+    <div class="result-row"><span class="result-label">Location</span><span class="result-value" style="font-size:12px;color:var(--text-secondary)">${escHtml(entry.context)}</span></div>
+    <div style="margin-top:12px;padding:14px;background:var(--success-bg);border:1px solid var(--success-border);border-radius:var(--radius-sm)">
+      <div style="font-size:11px;color:var(--success);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">This passage is about:</div>
+      <div style="font-family:var(--font-verse);font-size:14px;line-height:1.6;color:var(--text-primary)">${escHtml(entry.correct)}</div>
+    </div>`;
+  document.getElementById('results-xp').innerHTML = `<div class="xp-breakdown">
+    ${state.roundBreakdown.map(b => `<div class="xp-line"><span>${b.label}</span><span class="amount">${b.xp >= 0 ? '+' : ''}${b.xp}</span></div>`).join('')}
+    <div class="xp-total"><span>Total</span><span>+${state.roundXP} XP</span></div>
+  </div>`;
+}
+
+
 function buildOptions(correct, wrongValues, count) {
   const wrongArr = (wrongValues || []).slice(0, count - 1);
   const all = [{ value: correct, eliminated: false, isCorrect: true }, ...wrongArr.map(v => ({ value: v, eliminated: false, isCorrect: false }))];
