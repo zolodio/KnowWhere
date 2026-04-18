@@ -312,31 +312,60 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 /* ===================== SCRAMBLE GAME STYLES ===================== */
 .scramble-answer-zone{min-height:72px;background:var(--bg-secondary);border:2px dashed var(--border-active);
   border-radius:var(--radius);padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
-  margin-bottom:16px;transition:border-color .2s;position:relative}
+  margin-bottom:16px;transition:border-color .3s, background .3s, box-shadow .3s;position:relative}
 .scramble-answer-zone.has-words{border-style:solid;border-color:var(--border-active)}
 .scramble-answer-zone.complete{border-color:var(--success);background:var(--success-bg)}
 .scramble-answer-zone.wrong-flash{border-color:var(--error);background:var(--error-bg);animation:shake .4s}
 .scramble-answer-zone .zone-placeholder{position:absolute;inset:0;display:flex;align-items:center;
   justify-content:center;color:var(--text-muted);font-size:13px;font-family:var(--font-verse);
   font-style:italic;pointer-events:none}
+/* Drop active state for answer zone */
+.scramble-answer-zone.drop-active{
+  border-color:var(--gold)!important;border-style:solid!important;
+  background:rgba(202,163,40,.06)!important;
+  box-shadow:0 0 0 2px var(--gold-dim), inset 0 0 20px rgba(202,163,40,.05)!important}
 
-.scramble-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 0;min-height:52px}
+.scramble-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 0;min-height:52px;
+  border-radius:var(--radius);transition:border-color .2s, background .2s;border:2px solid transparent}
+/* Drop active state for bank (return words) */
+.scramble-bank.drop-active{
+  border-color:var(--error)!important;border-style:dashed!important;
+  background:rgba(240,72,72,.04)!important}
 
 .word-chip{font-family:var(--font-verse);font-size:15px;padding:7px 13px;border-radius:var(--radius-sm);
-  border:1.5px solid var(--border-active);background:var(--bg-card);color:var(--text-primary);cursor:pointer;
+  border:1.5px solid var(--border-active);background:var(--bg-card);color:var(--text-primary);cursor:grab;
   transition:all .18s ease;user-select:none;-webkit-user-select:none;line-height:1.3;
-  box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  box-shadow:0 2px 8px rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:0;touch-action:none}
+.word-chip:active{cursor:grabbing}
 .word-chip:hover{border-color:var(--gold);color:var(--gold-light);background:var(--bg-card-hover);
   transform:translateY(-2px);box-shadow:0 4px 12px rgba(202,163,40,.2)}
-.word-chip:active{transform:scale(.95)}
 .word-chip.in-answer{background:linear-gradient(135deg,rgba(202,163,40,.12),rgba(202,163,40,.06));
   border-color:var(--gold-dim);color:var(--gold-light)}
-.word-chip.in-answer:hover{border-color:var(--error);color:var(--error);background:var(--error-bg)}
+.word-chip.in-answer:hover{border-color:var(--gold);background:rgba(202,163,40,.18)}
 .word-chip.correct-placed{background:var(--success-bg);border-color:var(--success-border);
   color:var(--success);cursor:default;pointer-events:none;animation:wordPop .25s ease}
 .word-chip.wrong-placed{background:var(--error-bg);border-color:var(--error-border);
   color:var(--error);animation:wordPop .25s ease}
 .word-chip.locked{cursor:default;pointer-events:none}
+/* Drag-over highlight: chip lights up gold as an insertion target */
+.word-chip.drag-over{
+  border-color:var(--gold)!important;
+  background:rgba(202,163,40,.22)!important;
+  transform:translateY(-4px) scale(1.06)!important;
+  box-shadow:0 0 0 2px var(--gold-dim), 0 8px 20px rgba(202,163,40,.3)!important;
+  color:var(--gold-light)!important}
+/* Ghost chip while dragging */
+.word-chip.dragging-ghost{opacity:.25!important;transform:none!important;pointer-events:none}
+
+/* Delete (×) button inside answer chips */
+.chip-x{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  font-size:11px;font-weight:700;line-height:1;
+  margin-left:6px;flex-shrink:0;
+  color:var(--text-muted);
+  transition:all .15s;cursor:pointer}
+.chip-x:hover{background:var(--error-bg);color:var(--error)}
 
 .scramble-progress{display:flex;align-items:center;justify-content:space-between;
   font-size:12px;color:var(--text-muted);margin-bottom:6px}
@@ -362,6 +391,11 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 .ref-hint:hover{border-color:var(--gold-dim);color:var(--gold)}
 .ref-hint.revealed{color:var(--gold);border-color:var(--gold-dim);cursor:default}
 
+/* Drag tip */
+.drag-tip{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);
+  text-align:center;justify-content:center;margin-bottom:8px;font-family:var(--font-ui)}
+.drag-tip i{font-size:10px;color:var(--gold-dim)}
+
 @media(max-width:380px){
   .app-title{font-size:22px;letter-spacing:2px}
   .pill{padding:8px 14px;font-size:13px}
@@ -380,7 +414,6 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
     <div class="app-icon"><i class="fa-solid fa-book-bible"></i></div>
     <h1 class="app-title">Scripture Quest</h1>
     <p class="app-subtitle">"Thy word is a lamp unto my feet"</p>
-    <!-- Translation Button -->
     <button class="translation-btn" onclick="openTranslationModal()" id="translation-btn-display">
       <i class="fa-solid fa-language" style="font-size:14px"></i>
       <span class="t-tag" id="translation-tag">WEB</span>
@@ -489,60 +522,24 @@ textarea.input-field{min-height:120px;resize:vertical;line-height:1.6;font-famil
 <script>
 // ===================== TRANSLATIONS =====================
 const TRANSLATIONS = [
-  // ── English ────────────────────────────────────────────────────────────────
-  {
-    id: 'web', tag: 'WEB', name: 'World English Bible', lang: 'English',
-    desc: 'Modern public domain translation, accurate and readable'
-  },
-  {
-    id: 'kjv', tag: 'KJV', name: 'King James Version', lang: 'English (1611)',
-    desc: 'The classic 1611 translation, beloved for its majestic prose'
-  },
-  {
-    id: 'asv', tag: 'ASV', name: 'American Standard Version', lang: 'English (1901)',
-    desc: 'Scholarly 1901 revision of the KJV, precise and widely respected'
-  },
-  {
-    id: 'darby', tag: 'DARBY', name: 'Darby Bible', lang: 'English (1890)',
-    desc: "J.N. Darby's 1890 literal translation, influential in prophecy study"
-  },
-  {
-    id: 'dra', tag: 'DRA', name: 'Douay-Rheims', lang: 'English (Catholic)',
-    desc: 'Historic Catholic English translation of the Latin Vulgate'
-  },
-  {
-    id: 'ylt', tag: 'YLT', name: "Young's Literal Translation", lang: 'English (1862)',
-    desc: "Robert Young's hyper-literal 1862 translation of the original texts"
-  },
-  {
-    id: 'bbe', tag: 'BBE', name: 'Bible in Basic English', lang: 'English',
-    desc: 'Simple vocabulary, accessible for all reading levels'
-  },
-  {
-    id: 'oeb-us', tag: 'OEB', name: 'Open English Bible (US)', lang: 'English',
-    desc: 'Contemporary open-license English translation'
-  },
-  {
-    id: 'webbe', tag: 'WEBBE', name: 'World English Bible (British)', lang: 'English (British)',
-    desc: 'British English edition of the WEB'
-  },
-  // ── Other Languages ────────────────────────────────────────────────────────
-  {
-    id: 'almeida', tag: 'ALM', name: 'Almeida Recebida', lang: 'Portuguese',
-    desc: 'Classic Portuguese translation by João Ferreira de Almeida'
-  },
-  {
-    id: 'rccv', tag: 'RCCV', name: 'Romanian Corrected Cornilescu', lang: 'Romanian',
-    desc: 'Corrected Cornilescu version in Romanian'
-  },
+  { id: 'web', tag: 'WEB', name: 'World English Bible', lang: 'English', desc: 'Modern public domain translation, accurate and readable' },
+  { id: 'kjv', tag: 'KJV', name: 'King James Version', lang: 'English (1611)', desc: 'The classic 1611 translation, beloved for its majestic prose' },
+  { id: 'asv', tag: 'ASV', name: 'American Standard Version', lang: 'English (1901)', desc: 'Scholarly 1901 revision of the KJV, precise and widely respected' },
+  { id: 'darby', tag: 'DARBY', name: 'Darby Bible', lang: 'English (1890)', desc: "J.N. Darby's 1890 literal translation, influential in prophecy study" },
+  { id: 'dra', tag: 'DRA', name: 'Douay-Rheims', lang: 'English (Catholic)', desc: 'Historic Catholic English translation of the Latin Vulgate' },
+  { id: 'ylt', tag: 'YLT', name: "Young's Literal Translation", lang: 'English (1862)', desc: "Robert Young's hyper-literal 1862 translation of the original texts" },
+  { id: 'bbe', tag: 'BBE', name: 'Bible in Basic English', lang: 'English', desc: 'Simple vocabulary, accessible for all reading levels' },
+  { id: 'oeb-us', tag: 'OEB', name: 'Open English Bible (US)', lang: 'English', desc: 'Contemporary open-license English translation' },
+  { id: 'webbe', tag: 'WEBBE', name: 'World English Bible (British)', lang: 'English (British)', desc: 'British English edition of the WEB' },
+  { id: 'almeida', tag: 'ALM', name: 'Almeida Recebida', lang: 'Portuguese', desc: 'Classic Portuguese translation by João Ferreira de Almeida' },
+  { id: 'rccv', tag: 'RCCV', name: 'Romanian Corrected Cornilescu', lang: 'Romanian', desc: 'Corrected Cornilescu version in Romanian' },
 ];
 
-let currentTranslation = TRANSLATIONS[0]; // default WEB
+let currentTranslation = TRANSLATIONS[0];
 
 function openTranslationModal() {
   const existing = document.getElementById('trans-modal');
   if (existing) existing.remove();
-
   const modal = document.createElement('div');
   modal.className = 'trans-modal';
   modal.id = 'trans-modal';
@@ -555,9 +552,7 @@ function openTranslationModal() {
       <div class="trans-search">
         <input type="text" id="trans-search-input" placeholder="Search translations…" oninput="filterTranslations()" autocomplete="off">
       </div>
-      <div class="trans-list" id="trans-list">
-        ${renderTranslationList(TRANSLATIONS)}
-      </div>
+      <div class="trans-list" id="trans-list">${renderTranslationList(TRANSLATIONS)}</div>
     </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) closeTranslationModal(); });
   document.body.appendChild(modal);
@@ -567,16 +562,9 @@ function openTranslationModal() {
 function renderTranslationList(list) {
   const englishGroup = list.filter(t => t.lang.startsWith('English'));
   const otherGroup   = list.filter(t => !t.lang.startsWith('English'));
-
   let html = '';
-  if (englishGroup.length) {
-    html += `<div class="trans-section-label">English</div>`;
-    html += englishGroup.map(t => renderTranslationItem(t)).join('');
-  }
-  if (otherGroup.length) {
-    html += `<div class="trans-section-label">Other Languages</div>`;
-    html += otherGroup.map(t => renderTranslationItem(t)).join('');
-  }
+  if (englishGroup.length) { html += `<div class="trans-section-label">English</div>`; html += englishGroup.map(t => renderTranslationItem(t)).join(''); }
+  if (otherGroup.length) { html += `<div class="trans-section-label">Other Languages</div>`; html += otherGroup.map(t => renderTranslationItem(t)).join(''); }
   return html || `<div class="trans-empty">No translations found</div>`;
 }
 
@@ -584,24 +572,14 @@ function renderTranslationItem(t) {
   const isActive = t.id === currentTranslation.id;
   return `<div class="trans-item ${isActive ? 'active' : ''}" onclick="selectTranslation('${t.id}')">
     <div class="t-abbr">${t.tag}</div>
-    <div class="t-name">
-      <div class="t-full">${escHtml(t.name)}</div>
-      <div class="t-lang">${escHtml(t.lang)} · ${escHtml(t.desc)}</div>
-    </div>
+    <div class="t-name"><div class="t-full">${escHtml(t.name)}</div><div class="t-lang">${escHtml(t.lang)} · ${escHtml(t.desc)}</div></div>
     <i class="fa-solid fa-check t-check"></i>
   </div>`;
 }
 
 function filterTranslations() {
   const q = document.getElementById('trans-search-input').value.toLowerCase().trim();
-  const list = q
-    ? TRANSLATIONS.filter(t =>
-        t.name.toLowerCase().includes(q) ||
-        t.tag.toLowerCase().includes(q) ||
-        t.lang.toLowerCase().includes(q) ||
-        t.desc.toLowerCase().includes(q)
-      )
-    : TRANSLATIONS;
+  const list = q ? TRANSLATIONS.filter(t => t.name.toLowerCase().includes(q) || t.tag.toLowerCase().includes(q) || t.lang.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q)) : TRANSLATIONS;
   document.getElementById('trans-list').innerHTML = renderTranslationList(list);
 }
 
@@ -731,33 +709,13 @@ async function fetchPassage(book, chapter, verseStart, verseEnd) {
   return [{ verse: verseStart, text: data.text.replace(/\n+/g, ' ').trim() }];
 }
 
-async function fetchWrongVerse(book, chapter, verse) {
-  try { return await fetchVerse(book, chapter, verse); } catch { return null; }
-}
-
 // ===================== STATE =====================
 const state = {
-  screen: 'home',
-  selectedGame: null,
-  selectedDiff: null,
-  selectedScrambleDiff: null,
-  xp: 0,
-  gamesPlayed: 0,
-  correctAnswers: 0,
-  totalAnswers: 0,
-  streak: 0,
-  bestStreak: 0,
-  currentData: null,
-  roundXP: 0,
-  roundBreakdown: [],
-  roundResults: [],
-  g1Step: 0,
-  g1Attempt: 0,
-  g1Options: [],
-  g2HintsUsed: 0,
-  g2Answered: false,
-  g2MediumOptions: [],
-  _easySetup: null,
+  screen: 'home', selectedGame: null, selectedDiff: null, selectedScrambleDiff: null,
+  xp: 0, gamesPlayed: 0, correctAnswers: 0, totalAnswers: 0, streak: 0, bestStreak: 0,
+  currentData: null, roundXP: 0, roundBreakdown: [], roundResults: [],
+  g1Step: 0, g1Attempt: 0, g1Options: [],
+  g2HintsUsed: 0, g2Answered: false, g2MediumOptions: [], _easySetup: null,
   scramble: {
     words: [], shuffled: [], answer: [], mistakes: 0, maxMistakes: 3,
     timerInterval: null, timeLeft: 90, finished: false, refRevealed: false, firstWordTime: null,
@@ -766,6 +724,10 @@ const state = {
     words: [], blankIndices: [], bankWords: [], answers: [], bankUsed: [], mistakes: 0, finished: false,
   },
 };
+
+// ===================== DRAG & DROP STATE =====================
+let _drag = { source: null }; // mouse/pointer DnD
+let _touch = { active: false, el: null }; // touch DnD
 
 // ===================== LEVELS =====================
 const LEVELS = [
@@ -807,9 +769,7 @@ const LEVELS = [
 
 function getLevel(xp) {
   let lvl = LEVELS[0];
-  for (let i = LEVELS.length - 1; i >= 0; i--) {
-    if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; break; }
-  }
+  for (let i = LEVELS.length - 1; i >= 0; i--) { if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; break; } }
   const idx = LEVELS.indexOf(lvl);
   const nextLvl = idx < LEVELS.length - 1 ? LEVELS[idx + 1] : null;
   const progress = nextLvl ? (xp - lvl.xp) / (nextLvl.xp - lvl.xp) : 1;
@@ -923,20 +883,19 @@ function selectScrambleDiff(diff) {
 
 function goHome() {
   scrambleClearTimer();
+  touchDragCancel();
   showScreen('home');
   updateStats();
 }
 
 function playAgain() {
   scrambleClearTimer();
+  touchDragCancel();
   startGame();
 }
 
 // ===================== LOADING UI =====================
-const LOADING_MSGS = [
-  'Unrolling the parchment…','Searching the scrolls…','Turning to a new page…',
-  'Seeking wisdom…','Opening the scriptures…','By lamplight…',
-];
+const LOADING_MSGS = ['Unrolling the parchment…','Searching the scrolls…','Turning to a new page…','Seeking wisdom…','Opening the scriptures…','By lamplight…'];
 
 function showLoading(msg) {
   const gc = document.getElementById('game-content');
@@ -966,6 +925,7 @@ function showApiError(err, retryFn) {
 // ===================== START GAME =====================
 async function startGame() {
   scrambleClearTimer();
+  touchDragCancel();
   _fillinActiveSlot = -1;
   showScreen('game');
   state.roundXP = 0;
@@ -1048,9 +1008,7 @@ async function startGame() {
 // ===================== FETCH WRONG VERSE DISTRACTORS =====================
 async function fetchMultipleWrongVerses(poolEntry, count) {
   const otherEntries = shuffleArray(
-    VERSE_POOL.filter(e =>
-      !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse)
-    )
+    VERSE_POOL.filter(e => !(e.book === poolEntry.book && e.chapter === poolEntry.chapter && e.verse === poolEntry.verse))
   );
   const results = [];
   for (const pick of otherEntries) {
@@ -1138,14 +1096,15 @@ function scrambleClearTimer() {
   }
 }
 
+// ===================== RENDER SCRAMBLE (with drag & drop) =====================
 function renderScramble() {
   const sc = state.scramble;
   const diff = state.selectedScrambleDiff;
   const data = state.currentData;
   const gc = document.getElementById('game-content');
 
-  const placedIndices = new Set(sc.answer);
-  const bankItems = sc.shuffled.filter(idx => !placedIndices.has(idx));
+  const placedSet = new Set(sc.answer);
+  const bankItems = sc.shuffled.filter(idx => !placedSet.has(idx));
 
   const timerHtml = diff === 'timed' ? `
     <div class="timer-row">
@@ -1167,15 +1126,44 @@ function renderScramble() {
     <button class="ref-hint ${sc.refRevealed ? 'revealed' : ''}" id="scramble-ref-btn"
       onclick="scrambleRevealRef()" ${sc.refRevealed ? 'disabled' : ''}>
       <i class="fa-solid fa-book-open" style="font-size:12px"></i>
-      ${sc.refRevealed
-        ? escHtml(`${data.book} ${data.chapter}:${data.verse}`)
-        : 'Reveal reference'
-      }
+      ${sc.refRevealed ? escHtml(`${data.book} ${data.chapter}:${data.verse}`) : 'Reveal reference'}
     </button>` : '';
+
+  // Answer zone chips — draggable, with × delete button
+  const answerChipsHtml = sc.answer.length === 0
+    ? '<div class="zone-placeholder">Tap or drag words here to build the verse…</div>'
+    : sc.answer.map((wordIdx, pos) => {
+        const word = sc.words[wordIdx];
+        return `<div class="word-chip in-answer"
+          draggable="true"
+          ondragstart="onAnswerDragStart(event,${pos})"
+          ondragover="onAnswerChipDragOver(event,${pos})"
+          ondrop="onAnswerChipDrop(event,${pos})"
+          ondragend="onDragEnd(event)"
+          ontouchstart="onTouchDragStart(event,'answer',${pos})"
+          data-pos="${pos}">
+          ${escHtml(word)}<span class="chip-x" onclick="event.stopPropagation();scrambleRemoveWord(${pos})">✕</span>
+        </div>`;
+      }).join('');
+
+  // Bank chips — draggable, click to add
+  const bankHtml = bankItems.length === 0
+    ? '<span style="color:var(--text-muted);font-size:13px;font-style:italic;font-family:var(--font-verse)">All words placed!</span>'
+    : bankItems.map(idx =>
+        `<div class="word-chip"
+          onclick="scrambleAddWord(${idx})"
+          draggable="true"
+          ondragstart="onBankDragStart(event,${idx})"
+          ondragend="onDragEnd(event)"
+          ontouchstart="onTouchDragStart(event,'bank',${idx})"
+          data-idx="${idx}">
+          ${escHtml(sc.words[idx])}
+        </div>`
+      ).join('');
 
   gc.innerHTML = `
     <div class="question-label" style="margin-bottom:4px">Reconstruct the verse</div>
-    <div class="question-sub">Tap words in the correct order</div>
+    <div class="question-sub">Tap or drag words into order · drag words to rearrange</div>
 
     ${timerHtml}
     ${mistakesHtml}
@@ -1186,30 +1174,24 @@ function renderScramble() {
       <span>${pct}%</span>
     </div>
 
-    <div class="scramble-answer-zone ${sc.answer.length > 0 ? 'has-words' : ''}" id="answer-zone">
-      ${sc.answer.length === 0
-        ? '<div class="zone-placeholder">Tap words below to build the verse…</div>'
-        : sc.answer.map((wordIdx, pos) => {
-            const word = sc.words[wordIdx];
-            return `<div class="word-chip in-answer" onclick="scrambleRemoveWord(${pos})" data-pos="${pos}">${escHtml(word)}</div>`;
-          }).join('')
-      }
+    <div class="scramble-answer-zone ${sc.answer.length > 0 ? 'has-words' : ''}" id="answer-zone"
+      ondragover="onZoneDragOver(event)"
+      ondrop="onZoneDrop(event)">
+      ${answerChipsHtml}
     </div>
 
     <div class="section-label" style="margin-bottom:4px">Word bank</div>
-    <div class="scramble-bank" id="word-bank">
-      ${bankItems.length === 0
-        ? '<span style="color:var(--text-muted);font-size:13px;font-style:italic">All words placed!</span>'
-        : bankItems.map(idx =>
-            `<div class="word-chip" onclick="scrambleAddWord(${idx})" data-idx="${idx}">${escHtml(sc.words[idx])}</div>`
-          ).join('')
-      }
+    <div class="drag-tip"><i class="fa-solid fa-hand-pointer"></i> Drag words to reorder · tap ✕ to remove</div>
+    <div class="scramble-bank" id="word-bank"
+      ondragover="onBankDragOver(event)"
+      ondrop="onBankDrop(event)">
+      ${bankHtml}
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0 8px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0 8px;flex-wrap:wrap">
       ${hintHtml}
       <button class="hint-btn" onclick="scrambleClear()" style="display:flex;align-items:center;gap:5px">
-        <i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Clear
+        <i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Clear all
       </button>
     </div>
 
@@ -1219,6 +1201,279 @@ function renderScramble() {
     </button>`;
 }
 
+// ===================== DRAG & DROP — MOUSE/POINTER =====================
+
+function onBankDragStart(e, wordIdx) {
+  if (state.scramble.finished) { e.preventDefault(); return; }
+  _drag = { source: 'bank', wordIdx };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', 'bank:' + wordIdx);
+  // Defer opacity so ghost image is captured first
+  setTimeout(() => { if (e.target) e.target.classList.add('dragging-ghost'); }, 0);
+}
+
+function onAnswerDragStart(e, pos) {
+  if (state.scramble.finished) { e.preventDefault(); return; }
+  const sc = state.scramble;
+  _drag = { source: 'answer', answerPos: pos, wordIdx: sc.answer[pos] };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', 'answer:' + pos);
+  setTimeout(() => { if (e.target) e.target.classList.add('dragging-ghost'); }, 0);
+}
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging-ghost');
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-active').forEach(el => el.classList.remove('drop-active'));
+  _drag = { source: null };
+}
+
+function onZoneDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (_drag.source === 'bank') {
+    document.getElementById('answer-zone').classList.add('drop-active');
+  }
+}
+
+function onZoneDrop(e) {
+  e.preventDefault();
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-active').forEach(el => el.classList.remove('drop-active'));
+  if (!_drag.source) return;
+  const sc = state.scramble;
+  if (_drag.source === 'bank') {
+    if (!sc.answer.includes(_drag.wordIdx)) {
+      sc.answer.push(_drag.wordIdx);
+      _drag = { source: null };
+      renderScramble();
+    }
+  }
+  // 'answer' dragged to empty zone space = no-op (already in zone)
+  _drag = { source: null };
+}
+
+function onAnswerChipDragOver(e, pos) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.word-chip.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-active').forEach(el => el.classList.remove('drop-active'));
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onAnswerChipDrop(e, dropPos) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-active').forEach(el => el.classList.remove('drop-active'));
+  if (!_drag.source) return;
+  const sc = state.scramble;
+
+  if (_drag.source === 'bank') {
+    // Insert word from bank before this position
+    if (!sc.answer.includes(_drag.wordIdx)) {
+      sc.answer.splice(dropPos, 0, _drag.wordIdx);
+    }
+  } else if (_drag.source === 'answer') {
+    // Reorder within answer zone
+    const fromPos = _drag.answerPos;
+    if (fromPos !== dropPos) {
+      const wordIdx = sc.answer.splice(fromPos, 1)[0];
+      // Adjust for the removal
+      const adjusted = dropPos > fromPos ? dropPos - 1 : dropPos;
+      sc.answer.splice(adjusted, 0, wordIdx);
+    }
+  }
+  _drag = { source: null };
+  renderScramble();
+}
+
+function onBankDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (_drag.source === 'answer') {
+    document.getElementById('word-bank').classList.add('drop-active');
+  }
+}
+
+function onBankDrop(e) {
+  e.preventDefault();
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-active').forEach(el => el.classList.remove('drop-active'));
+  if (!_drag.source) return;
+  const sc = state.scramble;
+  if (_drag.source === 'answer') {
+    // Remove from answer → returns to bank
+    sc.answer.splice(_drag.answerPos, 1);
+    _drag = { source: null };
+    renderScramble();
+  }
+  _drag = { source: null };
+}
+
+// ===================== TOUCH DRAG & DROP =====================
+
+function onTouchDragStart(e, source, idx) {
+  if (state.scramble.finished) return;
+  // If tap came from the × button, let that click fire normally
+  if (e.target.closest && e.target.closest('.chip-x')) return;
+
+  const touch = e.touches[0];
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+
+  _touch = {
+    active: false,
+    moved: false,
+    source,
+    idx,          // wordIdx for 'bank', answerPos for 'answer'
+    wordIdx: source === 'bank' ? idx : state.scramble.answer[idx],
+    startX: touch.clientX,
+    startY: touch.clientY,
+    offsetX: touch.clientX - rect.left,
+    offsetY: touch.clientY - rect.top,
+    el,
+    clone: null,
+  };
+  // Don't preventDefault here so taps still work naturally
+}
+
+document.addEventListener('touchmove', function(e) {
+  if (!_touch.el) return;
+
+  const touch = e.touches[0];
+  const dx = touch.clientX - _touch.startX;
+  const dy = touch.clientY - _touch.startY;
+
+  if (!_touch.active && Math.sqrt(dx*dx + dy*dy) > 8) {
+    // Threshold crossed — begin drag
+    _touch.active = true;
+    _touch.moved = true;
+
+    const el = _touch.el;
+    const rect = el.getBoundingClientRect();
+
+    const clone = el.cloneNode(true);
+    clone.id = 'touch-drag-clone';
+    clone.removeAttribute('draggable');
+    Object.assign(clone.style, {
+      position: 'fixed',
+      zIndex: '9999',
+      width: rect.width + 'px',
+      pointerEvents: 'none',
+      opacity: '0.88',
+      transform: 'scale(1.1) rotate(-2deg)',
+      boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
+      border: '2px solid var(--gold)',
+      transition: 'none',
+      left: (touch.clientX - _touch.offsetX) + 'px',
+      top: (touch.clientY - _touch.offsetY) + 'px',
+    });
+    document.body.appendChild(clone);
+    _touch.clone = clone;
+    el.classList.add('dragging-ghost');
+  }
+
+  if (_touch.active) {
+    e.preventDefault();
+    if (_touch.clone) {
+      _touch.clone.style.left = (touch.clientX - _touch.offsetX) + 'px';
+      _touch.clone.style.top  = (touch.clientY - _touch.offsetY) + 'px';
+    }
+
+    // Highlight drop targets
+    document.querySelectorAll('.drag-over, .drop-active').forEach(el => {
+      el.classList.remove('drag-over', 'drop-active');
+    });
+    if (_touch.clone) _touch.clone.style.display = 'none';
+    const under = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (_touch.clone) _touch.clone.style.display = '';
+
+    if (under) {
+      const answerChip = under.closest('#answer-zone .word-chip[data-pos]');
+      const answerZone = under.closest('#answer-zone');
+      const bankZone   = under.closest('#word-bank');
+
+      if (answerChip) {
+        const pos = parseInt(answerChip.dataset.pos);
+        // Don't highlight the chip being dragged
+        if (!(_touch.source === 'answer' && pos === _touch.idx)) {
+          answerChip.classList.add('drag-over');
+        }
+      } else if (answerZone && _touch.source === 'bank') {
+        answerZone.classList.add('drop-active');
+      } else if (bankZone && _touch.source === 'answer') {
+        bankZone.classList.add('drop-active');
+      }
+    }
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', function(e) {
+  if (!_touch.el) return;
+
+  // Clean up visual artifacts
+  if (_touch.clone) { _touch.clone.remove(); _touch.clone = null; }
+  if (_touch.el) _touch.el.classList.remove('dragging-ghost');
+  document.querySelectorAll('.drag-over, .drop-active').forEach(el => {
+    el.classList.remove('drag-over', 'drop-active');
+  });
+
+  if (_touch.active && _touch.moved) {
+    const touch = e.changedTouches[0];
+    const sc = state.scramble;
+    // Temporarily hide clone (already removed) — find element beneath finger
+    const under = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (under) {
+      const answerChip = under.closest && under.closest('#answer-zone .word-chip[data-pos]');
+      const answerZone = under.closest && under.closest('#answer-zone');
+      const bankZone   = under.closest && under.closest('#word-bank');
+
+      if (answerChip) {
+        const dropPos = parseInt(answerChip.dataset.pos);
+        if (_touch.source === 'bank') {
+          if (!sc.answer.includes(_touch.wordIdx)) {
+            sc.answer.splice(dropPos, 0, _touch.wordIdx);
+            renderScramble();
+          }
+        } else if (_touch.source === 'answer') {
+          const fromPos = _touch.idx;
+          if (fromPos !== dropPos) {
+            const wordIdx = sc.answer.splice(fromPos, 1)[0];
+            const adjusted = dropPos > fromPos ? dropPos - 1 : dropPos;
+            sc.answer.splice(adjusted, 0, wordIdx);
+            renderScramble();
+          }
+        }
+      } else if (answerZone && _touch.source === 'bank') {
+        if (!sc.answer.includes(_touch.wordIdx)) {
+          sc.answer.push(_touch.wordIdx);
+          renderScramble();
+        }
+      } else if (bankZone && _touch.source === 'answer') {
+        sc.answer.splice(_touch.idx, 1);
+        renderScramble();
+      }
+    }
+  }
+  // If !_touch.moved, the touchend came from a tap — native click handler fires for bank chips
+
+  _touch = { active: false, el: null };
+}, { passive: true });
+
+function touchDragCancel() {
+  if (_touch.clone) { _touch.clone.remove(); _touch.clone = null; }
+  if (_touch.el) _touch.el.classList.remove('dragging-ghost');
+  document.querySelectorAll('.drag-over, .drop-active').forEach(el => {
+    el.classList.remove('drag-over', 'drop-active');
+  });
+  _touch = { active: false, el: null };
+  _drag = { source: null };
+}
+
+// ===================== SCRAMBLE ACTIONS =====================
 function scrambleRevealRef() {
   state.scramble.refRevealed = true;
   renderScramble();
@@ -1230,8 +1485,6 @@ function scrambleAddWord(wordIdx) {
   if (sc.answer.includes(wordIdx)) return;
   sc.answer.push(wordIdx);
   renderScramble();
-  const btn = document.getElementById('scramble-submit');
-  if (btn) btn.disabled = sc.answer.length < sc.words.length;
 }
 
 function scrambleRemoveWord(pos) {
@@ -1296,16 +1549,12 @@ function scrambleTimeUp() {
   const data = state.currentData;
   const gc = document.getElementById('game-content');
 
-  const placed = sc.answer.length;
   const correct = sc.answer.filter((idx, pos) => idx === pos).length;
   const pct = sc.words.length > 0 ? Math.round(correct / sc.words.length * 100) : 0;
-
   const xp = Math.max(0, Math.round(pct * 0.5));
+
   state.roundXP = xp;
-  state.roundBreakdown = [
-    { label: `${correct}/${sc.words.length} words correct`, xp: xp },
-    { label: 'Time ran out', xp: 0 },
-  ];
+  state.roundBreakdown = [{ label: `${correct}/${sc.words.length} words correct`, xp }, { label: 'Time ran out', xp: 0 }];
   state.totalAnswers++;
   state.streak = 0;
   state.gamesPlayed++;
@@ -1433,7 +1682,6 @@ function pickFillInBlanks(words) {
     const lengthScore = Math.min(clean.length, 10);
     return { i, score: lengthScore + 1 };
   });
-
   const eligible = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
   const count = Math.min(5, Math.max(3, Math.min(eligible.length, Math.floor(words.length * 0.3))));
   return eligible.slice(0, count).map(s => s.i).sort((a, b) => a - b);
@@ -1442,23 +1690,18 @@ function pickFillInBlanks(words) {
 function initFillIn(verseText) {
   const words = tokenizeVerse(verseText);
   const blankIndices = pickFillInBlanks(words);
-
   if (blankIndices.length < 2) {
     state.selectedScrambleDiff = 'relaxed';
     initScramble(verseText, state.currentData);
     return;
   }
-
   state.fillin = {
-    words,
-    blankIndices,
+    words, blankIndices,
     bankWords: shuffleArray(blankIndices.map(i => words[i])),
     answers: new Array(blankIndices.length).fill(null),
     bankUsed: new Array(blankIndices.length).fill(false),
-    mistakes: 0,
-    finished: false,
+    mistakes: 0, finished: false,
   };
-
   renderFillIn();
 }
 
@@ -1500,24 +1743,19 @@ function renderFillIn() {
   gc.innerHTML = `
     <div class="question-label" style="margin-bottom:4px">Fill in the missing words</div>
     <div class="question-sub">Tap a word from the bank to place it in the highlighted blank</div>
-
     <div class="fillin-verse" id="fillin-verse">${verseHtml}</div>
-
     <div class="scramble-progress" style="margin:8px 0 4px">
       <span>${filledCount}/${total} filled</span>
       <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(filledCount/total*100)}%"></div></div>
       <span>${Math.round(filledCount/total*100)}%</span>
     </div>
-
     <div class="section-label" style="margin:10px 0 4px">Word bank</div>
     <div class="scramble-bank" id="fillin-bank">${bankHtml}</div>
-
     <div style="display:flex;gap:8px;justify-content:center;margin:14px 0 8px">
       <button class="hint-btn" onclick="fillinClearAll()" style="display:flex;align-items:center;gap:5px">
         <i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Clear
       </button>
     </div>
-
     <button class="btn btn-primary btn-full" id="fillin-submit"
       onclick="fillinSubmit()" ${allFilled ? '' : 'disabled'}>
       <i class="fa-solid fa-check"></i> Check Answer
@@ -1526,21 +1764,16 @@ function renderFillIn() {
 
 let _fillinActiveSlot = -1;
 
-function fillinBlankClick(slot) {
-  _fillinActiveSlot = slot;
-  renderFillIn();
-}
+function fillinBlankClick(slot) { _fillinActiveSlot = slot; renderFillIn(); }
 
 function fillinPickWord(bankIdx) {
   const fi = state.fillin;
   if (fi.bankUsed[bankIdx]) return;
-
   let targetSlot = _fillinActiveSlot;
   if (targetSlot < 0 || targetSlot >= fi.answers.length || fi.answers[targetSlot] !== null) {
     targetSlot = fi.answers.indexOf(null);
   }
   if (targetSlot < 0) return;
-
   fi.answers[targetSlot] = fi.bankWords[bankIdx];
   fi.bankUsed[bankIdx] = true;
   _fillinActiveSlot = -1;
@@ -1651,6 +1884,7 @@ function fillinShowSuccess() {
   addXP(state.roundXP);
 }
 
+// ===================== VERSE DETECTIVE =====================
 function renderG1Steps() {
   const steps = ['Testament', 'Book', 'Chapter', 'Verse'];
   document.getElementById('step-indicator').innerHTML = steps.map((_, i) => {
